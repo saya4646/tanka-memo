@@ -101,6 +101,9 @@ main{flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;oversc
 .pick{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:12px;border-radius:12px;background:var(--surface);margin-bottom:6px;text-align:left;width:100%;box-shadow:var(--shadow)}
 .pick b{font-weight:700;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .pick small{color:var(--sub);white-space:nowrap;font-size:12px}
+.pick.preset{display:block}
+.pick.preset b{display:block;white-space:normal}
+.pick.preset small{display:block;white-space:normal;margin-top:1px}
 .pick.new{border:1.5px dashed var(--pri);color:var(--pri);background:transparent;box-shadow:none;justify-content:center;font-weight:700}
 .sec-title{font-size:13px;color:var(--sub);font-weight:700;margin:16px 2px 6px}
 .chosen{display:flex;align-items:center;gap:10px}
@@ -252,7 +255,7 @@ body.sheet-open .toast{bottom:calc(env(safe-area-inset-bottom) + 90px)}
 
 <script>
 'use strict';
-var APP_VERSION = '1.0.0';
+var APP_VERSION = '1.1.0';
 var DB_NAME = 'tanka-memo';          // ほかのアプリと混ざらない専用の保存場所
 var BACKUP_APP_ID = 'tanka-memo';
 var REMIND_COUNT = 30;               // バックアップしていない記録がこの件数たまったらお知らせ
@@ -267,8 +270,85 @@ var UNITS = [
   { k: 'mai', label: '枚', base: 100 },
   { k: 'kumi', label: '組', base: 100 },
   { k: 'm', label: 'm', base: 1 },
+  { k: 'hon', label: '本', base: 1 },
   { k: 'kai', label: '回', base: 1 }
 ];
+
+// 最初から登録しておく「よく行くお店」（この順で並ぶ）
+var DEFAULT_SHOPS = ['ツルハ', 'ウエルシア', 'アオキ', 'カワチ', 'ヤマザワ', 'セイムス'];
+
+// ドラッグストアの日用品の商品名候補（2026年10月にメーカー公式サイト・販売店サイトで名前と容量の単位を確認）
+// n：商品名（ブランド＋シリーズ）、u：パッケージの容量の単位、k：検索で引っかけたい別の言い方
+var PRESET_CATS = [
+  { c: '洗濯洗剤', k: '洗濯洗剤 せんたく 洗剤 液体洗剤', list: [
+    ['アタックZERO', 'g', 'アタックゼロ'], ['アタックZERO 部屋干し', 'g', 'アタックゼロ'], ['アタックZERO ドラム式専用', 'g', 'アタックゼロ'],
+    ['アタックZERO パーフェクトスティック', 'hon', 'アタックゼロ'],
+    ['アタック抗菌EX', 'g', ''], ['アタック抗菌EX 部屋干し用', 'g', ''], ['アタック抗菌EX ラク干しプラス', 'g', ''],
+    ['アタック除菌アドバンス', 'g', ''], ['アタック消臭ストロングジェル', 'g', ''], ['アタック高浸透リセットパワー', 'g', '粉末'],
+    ['ニュービーズ', 'g', ''],
+    ['アリエール ジェル', 'g', ''], ['アリエール 除菌プラス', 'g', ''], ['アリエール ジェルボール', 'ko', ''],
+    ['ボールド 液体', 'g', '柔軟剤入り'], ['ボールド ジェル', 'g', '柔軟剤入り'], ['ボールド ジェルボール', 'ko', '柔軟剤入り'],
+    ['さらさ 洗剤ジェル', 'g', ''],
+    ['NANOX one 洗浄プラス', 'g', 'ナノックス トップ'], ['NANOX one ニオイ専用', 'g', 'ナノックス トップ'], ['NANOX 自動投入洗濯機専用', 'g', 'ナノックス トップ'],
+    ['部屋干しトップ除菌EX', 'g', ''], ['トップ クリアリキッド抗菌', 'g', ''],
+    ['アクロン', 'ml', 'おしゃれ着']
+  ] },
+  { c: '柔軟剤', k: '柔軟剤 柔軟仕上げ剤', list: [
+    ['レノア超消臭1WEEK', 'ml', 'ワンウィーク'], ['ハミング消臭実感', 'g', ''], ['ハミングフレアフレグランス', 'ml', 'フレア'],
+    ['ソフラン アロマリッチ', 'ml', '']
+  ] },
+  { c: '香りづけ・消臭ビーズ', k: 'ビーズ 消臭ビーズ 香りづけ 抗菌ビーズ', list: [
+    ['レノア 抗菌ビーズ', 'ml', '消臭ビーズ 煮沸レベル']
+  ] },
+  { c: '漂白剤', k: '漂白剤 ハイター', list: [
+    ['ワイドハイター EXパワー', 'ml', ''], ['ブライトSTRONG', 'ml', 'ブライト ストロング'], ['キッチンハイター', 'ml', '台所']
+  ] },
+  { c: '食器用洗剤', k: '食器用洗剤 台所用洗剤 食器洗い', list: [
+    ['キュキュット', 'ml', ''], ['キュキュット クリア除菌', 'ml', ''], ['ジョイ PRO洗浄', 'ml', 'JOY'],
+    ['CHARMY Magica', 'ml', 'チャーミー マジカ']
+  ] },
+  { c: 'ラップ', k: 'ラップ 食品用ラップ', list: [
+    ['サランラップ 30cm', 'm', ''], ['サランラップ 22cm', 'm', ''],
+    ['NEWクレラップ 30cm', 'm', 'クレラップ'], ['NEWクレラップ 22cm', 'm', 'クレラップ'], ['NEWクレラップ 15cm', 'm', 'クレラップ']
+  ] },
+  { c: 'キッチンペーパー', k: 'キッチンペーパー キッチンタオル', list: [
+    ['スコッティ ファイン 3倍長持ちキッチンタオル', 'mai', ''], ['エリエール 超吸収キッチンタオル', 'mai', ''],
+    ['ネピア 激吸収キッチンタオル', 'mai', '']
+  ] },
+  { c: 'ティッシュ', k: 'ティッシュ ティシュ ティシュー ティッシュペーパー', list: [
+    ['クリネックス ティシュー', 'kumi', ''], ['クリネックス ティシュー ローション 肌うるる', 'kumi', ''],
+    ['スコッティ ティシュー', 'kumi', ''], ['スコッティ カシミヤ', 'kumi', ''],
+    ['ネピア ティシュ', 'kumi', ''], ['ネピア 鼻セレブ ティシュ', 'kumi', ''], ['ネピア ネピネピ ティシュ', 'kumi', '']
+  ] },
+  { c: 'トイレットペーパー', k: 'トイレットペーパー トイレットロール トイレ', list: [
+    ['スコッティ フラワーパック（ダブル）', 'm', ''], ['スコッティ フラワーパック（シングル）', 'm', ''],
+    ['クリネックス 長持ち（ダブル）', 'm', ''], ['クリネックス 長持ち（シングル）', 'm', ''],
+    ['エリエール トイレットティシュー（ダブル）', 'm', ''],
+    ['ネピア トイレットロール', 'm', ''], ['ネピア ネピネピ トイレットロール', 'm', '']
+  ] },
+  { c: 'シャンプー', k: 'シャンプー', list: [
+    ['メリット シャンプー', 'ml', ''], ['メリット リンスのいらないシャンプー', 'ml', ''], ['エッセンシャル シャンプー', 'ml', ''],
+    ['パンテーン シャンプー', 'ml', ''], ['いち髪 シャンプー', 'ml', ''], ['TSUBAKI シャンプー', 'ml', 'ツバキ 椿']
+  ] },
+  { c: 'コンディショナー', k: 'コンディショナー リンス', list: [
+    ['メリット コンディショナー', 'ml', ''], ['エッセンシャル コンディショナー', 'ml', '']
+  ] },
+  { c: 'ボディソープ', k: 'ボディソープ ボディウォッシュ', list: [
+    ['ビオレu', 'ml', 'ビオレユー'], ['ビオレu 泡で出てくるボディウォッシュ', 'ml', 'ビオレユー'],
+    ['ナイーブ ボディソープ', 'ml', ''], ['ダヴ ボディウォッシュ', 'g', 'ダブ']
+  ] },
+  { c: 'ハンドソープ', k: 'ハンドソープ 手洗い', list: [
+    ['キレイキレイ 薬用泡ハンドソープ', 'ml', ''], ['ビオレu 泡ハンドソープ', 'ml', 'ビオレユー'], ['ミューズ 泡ハンドソープ', 'ml', '']
+  ] },
+  { c: '歯みがき粉', k: '歯みがき粉 歯磨き粉 ハミガキ 歯磨き', list: [
+    ['クリアクリーン', 'g', ''], ['ピュオーラ', 'g', ''], ['クリニカ ハミガキ', 'g', ''], ['NONIO ハミガキ', 'g', 'ノニオ'],
+    ['デンターシステマ ハミガキ', 'g', 'システマ'], ['システマEX ハミガキ', 'g', 'システマ']
+  ] }
+];
+var PRESETS = [];
+PRESET_CATS.forEach(function (cat) {
+  cat.list.forEach(function (p) { PRESETS.push({ name: p[0], unit: p[1], cat: cat.c, key: norm(p[0] + ' ' + p[2] + ' ' + cat.c + ' ' + cat.k) }); });
+});
 var PERIODS = [
   { d: 183, label: '半年' },
   { d: 365, label: '1年' },
@@ -312,6 +392,11 @@ function norm(s) {
   s = String(s || '').normalize('NFKC').toLowerCase();
   return s.replace(/[ァ-ヶ]/g, function (c) { return String.fromCharCode(c.charCodeAt(0) - 0x60); }).replace(/\s+/g, '');
 }
+// 空白で区切った言葉が、すべて含まれていれば一致とする（例：「アタック 部屋干し」）
+function matchQ(key, rawQ) {
+  var ts = String(rawQ || '').normalize('NFKC').split(/\s+/).map(norm).filter(Boolean);
+  return ts.every(function (t) { return key.indexOf(t) >= 0; });
+}
 function unitOf(item) { for (var i = 0; i < UNITS.length; i++) if (UNITS[i].k === (item && item.unit)) return UNITS[i]; return UNITS[0]; }
 function perLabel(item) { var u = unitOf(item); return u.base + u.label + 'あたり'; }
 function fmtQty(n) { return (Math.round(n * 100) / 100).toLocaleString('ja-JP', { maximumFractionDigits: 2 }); }
@@ -353,7 +438,7 @@ function dbAll(store) { return reqP(db.transaction(store).objectStore(store).get
 function dbWrite(stores, fn) { var t = db.transaction(stores, 'readwrite'); fn(t); return doneP(t); }
 
 var items = [], prices = [];
-var settings = { lastBackupAt: 0, backupRemind: true, remindSnoozeUntil: 0, favShops: [], lastShop: '', taxMode: 'in', period: 365, persistAsked: false };
+var settings = { lastBackupAt: 0, backupRemind: true, remindSnoozeUntil: 0, favShops: DEFAULT_SHOPS.slice(), lastShop: '', taxMode: 'in', period: 365, persistAsked: false };
 function loadSettings() { return dbAll('settings').then(function (all) { all.forEach(function (s) { settings[s.key] = s.value; }); }); }
 function saveSetting(key, value) { settings[key] = value; return dbWrite(['settings'], function (t) { t.objectStore('settings').put({ key: key, value: value }); }); }
 function reloadAll() {
@@ -389,6 +474,14 @@ function delItem(id) {
     prices = prices.filter(function (x) { return x.itemId !== id; });
     return saveSetting('lastDeleteAt', Date.now());
   });
+}
+// よく行くお店の初期登録（1回だけ）。すでに登録してあるお店は、その後ろに残す
+async function applyDefaultShops() {
+  if (settings.defaultShopsV1) return;
+  var cur = Array.isArray(settings.favShops) ? settings.favShops : [];
+  var list = DEFAULT_SHOPS.slice();
+  cur.forEach(function (s) { if (s && list.indexOf(s) < 0) list.push(s); });
+  try { await saveSetting('favShops', list); await saveSetting('defaultShopsV1', true); } catch (e) {}
 }
 async function askPersist() {
   try { if (navigator.storage && navigator.storage.persist) return await navigator.storage.persist(); } catch (e) {}
@@ -544,7 +637,7 @@ function renderCheck(v) {
       '<div id="ckList"></div></section>';
     if (!items.length) {
       html += '<section class="card help"><h3>使い方</h3>' +
-        '<p>1. お店で気になった商品の名前を上の欄に入れて、商品を登録します。</p>' +
+        '<p>1. お店で気になった商品の名前を上の欄に入れます。よくある日用品は候補に出るので、タップするだけで登録できます。</p>' +
         '<p>2. 値札の値段と、パッケージに書いてある内容量（mLやg）を入れます。「2.4倍」のような倍率の表示は気にしなくて大丈夫です。</p>' +
         '<p>3. 「買った」か「見ただけ」で記録します。記録がたまるほど、安いか高いかの判定ができるようになります。</p></section>';
     }
@@ -609,7 +702,7 @@ function syncChips(act, cur) { $$('[data-chips="' + act + '"] .chip').forEach(fu
 function renderPickList() {
   var box = $('#ckList'); if (!box) return;
   var q = norm(ck.q), list;
-  if (q) list = items.filter(function (it) { return norm(it.name + ' ' + (it.memo || '')).indexOf(q) >= 0; }).sort(function (a, b) { return (b.lastUsedAt || 0) - (a.lastUsedAt || 0); });
+  if (q) list = items.filter(function (it) { return matchQ(norm(it.name + ' ' + (it.memo || '')), ck.q); }).sort(function (a, b) { return (b.lastUsedAt || 0) - (a.lastUsedAt || 0); });
   else list = recentItems();
   var html = '';
   if (list.length) {
@@ -618,11 +711,63 @@ function renderPickList() {
         var n = pricesOf(it.id).length;
         return '<button class="pick" data-act="pick" data-id="' + it.id + '"><b>' + esc(it.name) + '</b><small>' + n + '件の記録</small></button>';
       }).join('') + '</div>';
-  } else if (q) {
-    html += '<div class="sec-title">まだ登録されていない商品です</div>';
   }
-  html += '<div class="pick-list" style="margin-top:' + (list.length ? '4px' : '8px') + '"><button class="pick new" data-act="new-item">＋ ' + (ck.q.trim() ? '「' + esc(ck.q.trim()) + '」を' : '') + '新しい商品として登録</button></div>';
+  var ps = q ? presetMatches(ck.q) : [];
+  if (ps.length) {
+    html += '<div class="sec-title">商品名の候補（タップで登録）</div><div class="pick-list">' +
+      ps.slice(0, 20).map(function (p) { return presetBtnHTML(p); }).join('') + '</div>';
+  }
+  if (q && !list.length && !ps.length) html += '<div class="sec-title">まだ登録されていない商品です</div>';
+  html += '<div class="pick-list" style="margin-top:' + (list.length || ps.length ? '4px' : '8px') + '"><button class="pick new" data-act="new-item">＋ ' + (ck.q.trim() ? '「' + esc(ck.q.trim()) + '」を' : '') + '新しい商品として登録</button>' +
+    (q ? '' : '<button class="pick new" data-act="preset-browse">よくある商品の一覧から選ぶ</button>') + '</div>';
   box.innerHTML = html;
+}
+/* ===== 商品名の候補（プリセット） ===== */
+function registeredNames() { var s = new Set(); items.forEach(function (it) { s.add(norm(it.name)); }); return s; }
+function presetMatches(q) {
+  var reg = registeredNames();
+  return PRESETS.filter(function (p) { return matchQ(p.key, q) && !reg.has(norm(p.name)); });
+}
+function presetBtnHTML(p, noCat) {
+  return '<button class="pick preset" data-act="preset" data-name="' + esc(p.name) + '"><b>' + esc(p.name) + '</b><small>' + (noCat ? '' : esc(p.cat) + '・') + perLabel({ unit: p.unit }) + 'で比べます</small></button>';
+}
+async function addPreset(name) {
+  var p = PRESETS.filter(function (x) { return x.name === name; })[0]; if (!p) return;
+  var ex = items.filter(function (it) { return norm(it.name) === norm(p.name); })[0];
+  var it = ex;
+  if (!it) {
+    var now = Date.now();
+    it = { id: uid(), name: p.name, unit: p.unit, tax: 10, memo: '', createdAt: now, updatedAt: now, lastUsedAt: now };
+    try { await putItem(it); } catch (e) { alert(errMsg(e)); return; }
+    toast('「' + p.name + '」を登録しました');
+  }
+  closeSheet(true);
+  ck.itemId = it.id; ck.q = ''; ck.price = ''; ck.size = ''; ck.count = 1; ck.discType = 'none'; ck.discVal = '';
+  tab = 'check'; render(); $('#view').scrollTop = 0;
+}
+var presetQ = '';
+function openPresetBrowser() {
+  presetQ = '';
+  openSheet('よくある商品から選ぶ',
+    '<input type="search" class="search" id="psQ" placeholder="しぼりこむ（例：柔軟剤、ティッシュ）" autocomplete="off">' +
+    '<p class="hint">タップすると商品として登録され、そのままチェックできます。単位（mL・gなど）はパッケージの表示に合わせてあります。</p>' +
+    '<div id="psList"></div>', '');
+  $('#psQ').addEventListener('input', function (e) { presetQ = e.target.value; renderPresetList(); });
+  renderPresetList();
+}
+function renderPresetList() {
+  var box = $('#psList'); if (!box) return;
+  var q = norm(presetQ), reg = registeredNames(), html = '';
+  PRESET_CATS.forEach(function (cat) {
+    var ps = PRESETS.filter(function (p) { return p.cat === cat.c && (!q || matchQ(p.key, presetQ)); });
+    if (!ps.length) return;
+    html += '<div class="sec-title">' + esc(cat.c) + '</div><div class="pick-list">' + ps.map(function (p) {
+      return reg.has(norm(p.name))
+        ? '<button class="pick preset" data-act="preset" data-name="' + esc(p.name) + '"><b>' + esc(p.name) + '</b><small>登録済み（タップでチェック）</small></button>'
+        : presetBtnHTML(p, true);
+    }).join('') + '</div>';
+  });
+  box.innerHTML = html || '<div class="empty">見つかりませんでした</div>';
 }
 function currentCalc() {
   var item = itemById(ck.itemId); if (!item) return null;
@@ -714,7 +859,7 @@ function renderItemList() {
   var box = $('#itList'); if (!box) return;
   if (!items.length) { box.innerHTML = '<div class="empty"><b>まだ商品がありません</b>「チェック」の画面で商品名を入れると登録できます。</div>'; return; }
   var q = norm(listQ);
-  var list = recentItems().filter(function (it) { return !q || norm(it.name + ' ' + (it.memo || '')).indexOf(q) >= 0; });
+  var list = recentItems().filter(function (it) { return !q || matchQ(norm(it.name + ' ' + (it.memo || '')), listQ); });
   if (!list.length) { box.innerHTML = '<div class="empty">見つかりませんでした</div>'; return; }
   box.innerHTML = list.map(function (it) {
     var st = statsOf(it, null), n = pricesOf(it.id).length;
@@ -1107,6 +1252,8 @@ document.addEventListener('click', function (e) {
   else if (act === 'new-item') {
     openItemForm(null, ck.q.trim(), function (it) { closeSheet(true); ck.itemId = it.id; ck.q = ''; tab = 'check'; render(); setTimeout(function () { var p = $('#ckPrice'); if (p) p.focus(); }, 280); });
   }
+  else if (act === 'preset') addPreset(a.dataset.name);
+  else if (act === 'preset-browse') openPresetBrowser();
   else if (act === 'new-item-list') { openItemForm(null, listQ.trim(), function () { closeSheet(true); render(); }); }
   else if (act === 'ck-change') { ck.itemId = ''; ck.size = ''; ck.count = 1; render(); setTimeout(function () { var q = $('#ckQ'); if (q) q.focus(); }, 50); }
   else if (act === 'ck-detail') openItemDetail(ck.itemId);
@@ -1175,6 +1322,7 @@ $('#restoreFile').addEventListener('change', function (e) { var f = e.target.fil
     if (!window.indexedDB) throw new Error('このブラウザでは保存機能が使えません');
     db = await openDB();
     await loadSettings();
+    await applyDefaultShops();
     await reloadAll();
     render();
     maybeShowReminder();
