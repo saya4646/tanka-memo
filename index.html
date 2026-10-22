@@ -1,0 +1,1190 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="単価メモ">
+<meta name="theme-color" content="#f6f6fb" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#14141c" media="(prefers-color-scheme: dark)">
+<meta name="format-detection" content="telephone=no">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" href="icon-192.png">
+<title>単価メモ</title>
+<style>
+:root{
+  --bg:#f6f6fb;--surface:#ffffff;--surface2:#ececf5;--ink:#22223a;--sub:#6f6f86;--line:#e2e2ee;
+  --pri:#5b54d6;--pri-soft:#e7e5fb;
+  --best:#0f8a5f;--best-soft:#d5f2e5;--low:#2e9e57;--low-soft:#e1f5e7;
+  --mid:#8a6d00;--mid-soft:#fbf1cc;--high:#d9480f;--high-soft:#fde3d6;
+  --bad:#e03131;--shadow:0 2px 10px rgba(40,40,90,.07);--nav-h:58px;
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --bg:#14141c;--surface:#1f1f2b;--surface2:#2a2a39;--ink:#f1f1f8;--sub:#a5a5bb;--line:#33334a;
+    --pri:#8f89ff;--pri-soft:#2d2a55;
+    --best:#43d39e;--best-soft:#123a2c;--low:#6fd38f;--low-soft:#1a3524;
+    --mid:#f0c94a;--mid-soft:#3a3214;--high:#ff8a5c;--high-soft:#43231a;
+    --bad:#ff6b6b;--shadow:none;
+  }
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Hiragino Kaku Gothic ProN","Noto Sans JP","Noto Sans CJK JP",sans-serif;font-size:15px;line-height:1.5;-webkit-tap-highlight-color:transparent;overscroll-behavior-y:none}
+html,body{height:100%;overflow:hidden}
+#app{position:fixed;inset:0;display:flex;flex-direction:column}
+button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:pointer;-webkit-appearance:none;appearance:none}
+input,textarea,select{font:inherit;font-size:16px;color:var(--ink)}
+.hidden{display:none!important}
+.sub{color:var(--sub)}
+.small{font-size:13px}
+.num{font-variant-numeric:tabular-nums}
+
+.top{flex:none;display:flex;align-items:center;justify-content:space-between;padding:calc(env(safe-area-inset-top) + 8px) 16px 6px;background:var(--bg)}
+.brand{display:flex;align-items:center;gap:8px;font-weight:800;font-size:19px}
+.brand svg{width:28px;height:28px}
+main{flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior-y:contain;padding:4px max(16px,calc((100% - 608px) / 2)) 40px}
+
+.tabs{flex:none;display:grid;grid-template-columns:repeat(3,1fr);height:calc(var(--nav-h) + env(safe-area-inset-bottom));padding-bottom:env(safe-area-inset-bottom);background:var(--surface);border-top:1px solid var(--line)}
+.tabs button{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;height:var(--nav-h);font-size:11px;color:var(--sub)}
+.tabs button svg{width:24px;height:24px}
+.tabs button.on{color:var(--pri);font-weight:700}
+
+.card{background:var(--surface);border-radius:16px;padding:14px;box-shadow:var(--shadow);margin:12px 0}
+.card h3{margin:0 0 10px;font-size:15px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:12px 16px;border-radius:14px;font-weight:700;font-size:16px;text-decoration:none;color:var(--ink);background:var(--surface2)}
+.btn.primary{background:var(--pri);color:#fff}
+.btn.ghost{background:transparent;border:1.5px solid var(--line)}
+.btn.danger{background:transparent;border:1.5px solid var(--bad);color:var(--bad)}
+.btn.danger-solid{background:var(--bad);color:#fff}
+.btn.block{display:flex;width:100%}
+.btn:disabled{opacity:.45}
+.btn+.btn.block,.btn.block+.btn{margin-top:8px}
+.link{color:var(--pri);font-weight:700}
+.seg{display:flex;background:var(--surface2);border-radius:12px;padding:3px;gap:3px}
+.seg button{flex:1;padding:8px 4px;border-radius:10px;font-weight:600;color:var(--sub);font-size:14px;white-space:nowrap}
+.seg button.on{background:var(--surface);color:var(--pri);box-shadow:var(--shadow);font-weight:800}
+.empty{text-align:center;color:var(--sub);padding:40px 12px}
+.empty b{display:block;color:var(--ink);font-size:16px;margin-bottom:4px}
+.tag{display:inline-block;font-size:11px;font-weight:700;padding:1px 7px;border-radius:999px;vertical-align:1px}
+.tag.bought{background:var(--pri-soft);color:var(--pri)}
+.tag.seen{background:var(--surface2);color:var(--sub)}
+
+/* 入力 */
+.field{margin-top:14px}
+.field:first-child{margin-top:0}
+.field>label,.field>.lbl{display:block;font-size:13px;color:var(--sub);font-weight:700;margin-bottom:6px}
+.inp,.field input[type=text],.field input[type=date],.field textarea{width:100%;padding:11px 12px;border-radius:12px;border:1.5px solid var(--line);background:var(--surface);-webkit-appearance:none;appearance:none;min-height:46px}
+.inp:focus,.field input:focus{outline:none;border-color:var(--pri)}
+.field textarea{resize:vertical;min-height:70px}
+.field .note{font-size:12px;color:var(--sub);margin-top:6px}
+.unit-in{display:flex;align-items:center;gap:8px}
+.unit-in .inp{flex:1;min-width:0;font-size:20px;font-weight:700;text-align:right}
+.unit-in>span{font-weight:700;min-width:28px}
+.price-row{display:grid;grid-template-columns:1fr 132px;gap:8px;align-items:center}
+.size-row{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center}
+.stepper{display:flex;align-items:center;gap:4px}
+.stepper button{width:38px;height:44px;border-radius:12px;background:var(--surface);border:1.5px solid var(--line);font-size:20px;font-weight:700}
+.stepper output{min-width:46px;text-align:center;font-size:16px;font-weight:800}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{padding:7px 12px;border-radius:999px;border:1.5px solid var(--line);background:var(--surface);font-weight:600;font-size:14px}
+.chip.on{background:var(--pri);border-color:var(--pri);color:#fff}
+.chips+.inp,.chips+input{margin-top:8px}
+
+/* 商品の選択 */
+.search{width:100%;padding:12px 12px;border-radius:12px;border:1.5px solid var(--line);background:var(--surface);-webkit-appearance:none;appearance:none}
+.search:focus{outline:none;border-color:var(--pri)}
+.pick-list{display:flex;flex-direction:column;margin-top:8px}
+.pick{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:12px;border-radius:12px;background:var(--surface);margin-bottom:6px;text-align:left;width:100%;box-shadow:var(--shadow)}
+.pick b{font-weight:700;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pick small{color:var(--sub);white-space:nowrap;font-size:12px}
+.pick.new{border:1.5px dashed var(--pri);color:var(--pri);background:transparent;box-shadow:none;justify-content:center;font-weight:700}
+.sec-title{font-size:13px;color:var(--sub);font-weight:700;margin:16px 2px 6px}
+.chosen{display:flex;align-items:center;gap:10px}
+.chosen .nm{flex:1;min-width:0}
+.chosen .nm b{display:block;font-size:17px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.chosen .nm small{color:var(--sub);font-size:12px}
+.mini{padding:7px 11px;border-radius:10px;background:var(--surface2);font-size:13px;font-weight:700;flex:none}
+.mini.del{color:var(--bad)}
+.mini:disabled{opacity:.3}
+
+/* 判定 */
+.result{border-radius:18px;padding:16px;margin:12px 0;background:var(--surface);box-shadow:var(--shadow)}
+.result.wait{color:var(--sub);text-align:center;font-size:14px}
+.result.best{background:var(--best-soft)}
+.result.low{background:var(--low-soft)}
+.result.mid{background:var(--mid-soft)}
+.result.high{background:var(--high-soft)}
+.verdict{font-size:26px;font-weight:900;letter-spacing:.04em;line-height:1.2}
+.best .verdict{color:var(--best)}.low .verdict{color:var(--low)}.mid .verdict{color:var(--mid)}.high .verdict{color:var(--high)}
+.verdict-sub{font-size:13px;margin-top:2px;color:var(--sub)}
+.unitp{display:flex;align-items:baseline;gap:6px;margin-top:10px;flex-wrap:wrap}
+.unitp .lb{font-size:13px;color:var(--sub);font-weight:700}
+.unitp .v{font-size:30px;font-weight:900;line-height:1.1}
+.unitp .v span{font-size:15px;margin-left:2px}
+.pay{font-size:13px;color:var(--sub);margin-top:2px}
+.facts{margin-top:12px;background:color-mix(in srgb,var(--surface) 75%,transparent);border-radius:12px;padding:4px 12px}
+.fact{display:flex;justify-content:space-between;gap:10px;padding:8px 0;border-bottom:1px solid var(--line);font-size:14px}
+.fact:last-child{border-bottom:0}
+.fact span{color:var(--sub);flex:none}
+.fact b{text-align:right}
+.fact b small{display:block;font-weight:500;color:var(--sub);font-size:11px}
+.target{margin-top:10px;font-size:14px;line-height:1.6}
+.target b{font-size:16px}
+.first-note{margin-top:10px;font-size:14px}
+.period-note{font-size:12px;color:var(--sub);margin-top:8px}
+.sizes{margin-top:12px}
+.sizes h4{margin:0 0 4px;font-size:13px;color:var(--sub)}
+.srow{display:grid;grid-template-columns:1fr auto auto;gap:10px;padding:7px 0;border-bottom:1px solid var(--line);font-size:14px;align-items:center}
+.srow:last-child{border-bottom:0}
+.srow .s{font-weight:700}
+.srow .u{text-align:right;font-weight:700}
+.srow .d{text-align:right;font-size:12px;color:var(--sub);min-width:58px}
+.srow.cheap .s::after{content:'いちばん安い';margin-left:6px;font-size:10px;font-weight:800;color:#fff;background:var(--best);padding:1px 6px;border-radius:99px;vertical-align:2px}
+.save-btns{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:14px}
+.save-btns .btn{padding:14px 8px}
+
+/* 商品一覧 */
+.item{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;padding:12px;border-radius:14px;background:var(--surface);margin-bottom:6px;text-align:left;width:100%;box-shadow:var(--shadow)}
+.item .nm{font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.item .mt{font-size:12px;color:var(--sub)}
+.item .rt{text-align:right;font-size:14px;font-weight:800;white-space:nowrap}
+.item .rt small{display:block;font-weight:500;color:var(--sub);font-size:11px}
+.head-row{display:flex;gap:8px;align-items:center;margin:4px 0 10px}
+.head-row .search{flex:1}
+
+/* 詳細 */
+.kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.kpi{background:var(--surface);border-radius:12px;padding:10px;box-shadow:var(--shadow)}
+.kpi .k{font-size:11px;color:var(--sub);font-weight:700}
+.kpi .v{font-size:18px;font-weight:800;line-height:1.25}
+.kpi .v span{font-size:11px;margin-left:1px}
+.chart svg{display:block;width:100%;height:auto}
+.legend{display:flex;gap:14px;font-size:12px;color:var(--sub);margin-top:4px}
+.rec{display:grid;grid-template-columns:1fr auto;gap:8px;padding:10px 0;border-bottom:1px solid var(--line);text-align:left;width:100%}
+.rec:last-child{border-bottom:0}
+.rec .l b{font-weight:700}
+.rec .l small{display:block;color:var(--sub);font-size:12px}
+.rec .r{text-align:right;font-weight:800}
+.rec .r small{display:block;font-weight:500;color:var(--sub);font-size:12px}
+.rec .memo{color:var(--sub);font-size:12px}
+
+/* シート */
+.sheet{position:fixed;inset:0;z-index:50;background:rgba(15,15,35,.4);opacity:0;transition:opacity .2s}
+.sheet.show{opacity:1}
+.sheet-panel{position:absolute;left:0;right:0;bottom:0;top:calc(env(safe-area-inset-top) + 16px);background:var(--bg);border-radius:20px 20px 0 0;display:flex;flex-direction:column;transform:translateY(100%);transition:transform .25s ease;max-width:640px;margin:0 auto}
+.sheet.show .sheet-panel{transform:none}
+.sheet-head{display:grid;grid-template-columns:72px 1fr 72px;align-items:center;padding:12px 12px 8px;border-bottom:1px solid var(--line)}
+.sheet-head .link{text-align:left;padding:4px}
+.sheet-title{text-align:center;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sheet-body{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:14px 16px 24px}
+.sheet-foot{padding:10px 16px calc(env(safe-area-inset-bottom) + 10px);border-top:1px solid var(--line);background:var(--bg)}
+.sheet-foot:empty{display:none}
+
+/* 設定 */
+.set-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--line);font-size:14px;gap:10px}
+.set-row:last-child{border-bottom:0}
+.set-row b{white-space:nowrap}
+.set-desc{font-size:13px;color:var(--sub);margin:0 0 10px}
+.switch-row{position:relative;display:flex;justify-content:space-between;align-items:center;font-weight:700;cursor:pointer;gap:12px}
+.switch-row input{position:absolute;opacity:0;width:1px;height:1px}
+.switch{position:relative;width:52px;height:32px;border-radius:16px;background:var(--line);transition:background .2s;flex:none}
+.switch::after{content:'';position:absolute;top:3px;left:3px;width:26px;height:26px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.25);transition:transform .2s}
+.switch-row input:checked+.switch{background:var(--best)}
+.switch-row input:checked+.switch::after{transform:translateX(20px)}
+.fav-row{display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--line)}
+.fav-row .nm{flex:1;min-width:0;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.inline{display:flex;gap:8px;align-items:center}
+.inline .inp{flex:1}
+.ok-text{color:var(--best);font-weight:700}
+.warn-text{color:var(--bad);font-weight:700}
+.notice{display:flex;align-items:center;gap:10px;background:var(--mid-soft);border-radius:14px;padding:10px 12px;margin:0 0 12px;font-size:13px;width:100%;text-align:left}
+.notice .go{margin-left:auto;font-weight:800;color:var(--pri);white-space:nowrap}
+.info{display:grid;grid-template-columns:88px 1fr;gap:8px 10px;margin:12px 0 0;background:var(--surface);border-radius:14px;padding:12px}
+.info dt{color:var(--sub);font-size:13px}
+.info dd{margin:0;font-weight:600;word-break:break-all}
+.hint{font-size:13px;color:var(--sub);margin:10px 0}
+.remind p{margin:0 0 12px}
+.remind-lead{font-size:19px;font-weight:800}
+.steps{background:var(--surface);border-radius:14px;padding:12px;display:flex;flex-direction:column;gap:12px;margin:4px 0 14px}
+.step{display:grid;grid-template-columns:28px 1fr;gap:10px;align-items:start}
+.step span{width:26px;height:26px;border-radius:50%;background:var(--pri);color:#fff;font-weight:800;display:grid;place-items:center;font-size:14px}
+.lose{background:var(--surface);border-radius:14px;padding:10px 14px;margin:0 0 12px}
+.lose div{padding:6px 0;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;gap:8px}
+.lose div:last-child{border-bottom:0}
+.warn-box{background:var(--mid-soft);border-radius:14px;padding:12px;margin:0 0 14px}
+.warn-box p{margin:0 0 10px}
+.card.danger-zone{margin-top:36px;border:1.5px solid color-mix(in srgb,var(--bad) 45%,transparent)}
+.card.danger-zone h3{color:var(--bad)}
+.help p{margin:0 0 8px;font-size:14px}
+.version{text-align:center;font-size:12px;color:var(--sub);margin:20px 0 0}
+
+.toast{position:fixed;left:50%;width:max-content;bottom:calc(var(--nav-h) + env(safe-area-inset-bottom) + 20px);transform:translate(-50%,20px);z-index:80;background:var(--ink);color:var(--bg);padding:10px 18px;border-radius:999px;font-weight:700;font-size:14px;opacity:0;transition:opacity .2s,transform .2s;pointer-events:none;max-width:90vw;text-align:center}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+.toast.multi{white-space:pre-line;border-radius:16px;line-height:1.6;width:max-content}
+body.sheet-open .toast{bottom:calc(env(safe-area-inset-bottom) + 90px)}
+</style>
+</head>
+<body>
+<div id="app">
+<header class="top">
+  <div class="brand">
+    <svg viewBox="0 0 32 32" aria-hidden="true"><rect x="1" y="1" width="30" height="30" rx="9" fill="#5b54d6"/><path d="M8 9.5h8.6l7.4 7.4-7.6 7.6L9 17.1V9.5z" fill="#fff"/><circle cx="12.4" cy="13" r="1.7" fill="#5b54d6"/></svg>
+    単価メモ
+  </div>
+</header>
+
+<main id="view"><div class="empty">読み込んでいます…</div></main>
+
+<nav class="tabs">
+  <button data-tab="check" class="on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 5.5h8l9 9-7.5 7.5-9.5-9.5v-7z"/><circle cx="8" cy="10" r="1.5"/></svg>チェック</button>
+  <button data-tab="items"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M8 6h13M8 12h13M8 18h13"/><circle cx="3.5" cy="6" r="1"/><circle cx="3.5" cy="12" r="1"/><circle cx="3.5" cy="18" r="1"/></svg>商品</button>
+  <button data-tab="settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>設定</button>
+</nav>
+</div>
+
+<div id="sheet" class="sheet hidden"></div>
+<div id="toast" class="toast"></div>
+<input type="file" id="restoreFile" accept=".json,application/json,text/plain" class="hidden">
+
+<script>
+'use strict';
+var APP_VERSION = '1.0.0';
+var DB_NAME = 'tanka-memo';          // ほかのアプリと混ざらない専用の保存場所
+var BACKUP_APP_ID = 'tanka-memo';
+var REMIND_COUNT = 30;               // バックアップしていない記録がこの件数たまったらお知らせ
+var SNOOZE_DAYS = 3;
+var RESET_WORD = 'けす';
+
+// 単位：基準の量（mL・gは100あたり、それ以外は1あたり）
+var UNITS = [
+  { k: 'ml', label: 'mL', base: 100 },
+  { k: 'g', label: 'g', base: 100 },
+  { k: 'ko', label: '個', base: 1 },
+  { k: 'mai', label: '枚', base: 100 },
+  { k: 'kumi', label: '組', base: 100 },
+  { k: 'm', label: 'm', base: 1 },
+  { k: 'kai', label: '回', base: 1 }
+];
+var PERIODS = [
+  { d: 183, label: '半年' },
+  { d: 365, label: '1年' },
+  { d: 730, label: '2年' },
+  { d: 0, label: '全部' }
+];
+var LEVELS = {
+  best: { t: '最安値更新', s: 'これまでの記録でいちばん安い値段です' },
+  low: { t: '安め', s: 'いつもより安い、または最安値に近い値段です' },
+  mid: { t: 'ふつう', s: 'いつもと同じくらいの値段です' },
+  high: { t: '高め', s: 'いつもより高い値段です' }
+};
+
+/* ===== 小道具 ===== */
+function $(s, el) { return (el || document).querySelector(s); }
+function $$(s, el) { return Array.prototype.slice.call((el || document).querySelectorAll(s)); }
+function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+function yen(n) { return (Math.round(Number(n) || 0)).toLocaleString('ja-JP'); }
+function pad(n) { return String(n).padStart(2, '0'); }
+function dateStr(d) { return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()); }
+function todayStr() { return dateStr(new Date()); }
+var WD = ['日', '月', '火', '水', '木', '金', '土'];
+function parseDate(s) { var p = String(s).split('-').map(Number); return new Date(p[0], p[1] - 1, p[2]); }
+function fmtDate(s) { var d = parseDate(s); return (d.getMonth() + 1) + '/' + d.getDate(); }
+function fmtDateY(s) { var d = parseDate(s); return d.getFullYear() + '年' + (d.getMonth() + 1) + '月' + d.getDate() + '日(' + WD[d.getDay()] + ')'; }
+function fmtDateShort(s) {
+  var d = parseDate(s), now = new Date();
+  return (d.getFullYear() === now.getFullYear() ? '' : d.getFullYear() + '年') + (d.getMonth() + 1) + '月' + d.getDate() + '日';
+}
+function fmtDateTime(ms) { var d = new Date(ms); return d.getFullYear() + '年' + (d.getMonth() + 1) + '月' + d.getDate() + '日 ' + pad(d.getHours()) + ':' + pad(d.getMinutes()); }
+function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 8); }
+// 全角数字・カンマ・「円」が混ざっていても数字として読む
+function num(s) {
+  s = String(s == null ? '' : s).normalize('NFKC').replace(/[,\s円]/g, '').replace(/[ー−‐]/g, '-');
+  if (!s) return NaN;
+  var n = Number(s);
+  return isFinite(n) ? n : NaN;
+}
+// 検索用：ひらがな・カタカナ、全角・半角、大文字・小文字の違いを無視する
+function norm(s) {
+  s = String(s || '').normalize('NFKC').toLowerCase();
+  return s.replace(/[ァ-ヶ]/g, function (c) { return String.fromCharCode(c.charCodeAt(0) - 0x60); }).replace(/\s+/g, '');
+}
+function unitOf(item) { for (var i = 0; i < UNITS.length; i++) if (UNITS[i].k === (item && item.unit)) return UNITS[i]; return UNITS[0]; }
+function perLabel(item) { var u = unitOf(item); return u.base + u.label + 'あたり'; }
+function fmtQty(n) { return (Math.round(n * 100) / 100).toLocaleString('ja-JP', { maximumFractionDigits: 2 }); }
+// 単価の表示：小さい数は小数点以下まで出す
+function fmtUnit(v) {
+  if (!isFinite(v)) return '—';
+  if (v < 10) return v.toLocaleString('ja-JP', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  if (v < 1000) return v.toLocaleString('ja-JP', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+  return Math.round(v).toLocaleString('ja-JP');
+}
+function sizeLabel(r, item) {
+  var u = unitOf(item);
+  return fmtQty(r.size) + u.label + (r.count > 1 ? '×' + fmtQty(r.count) : '');
+}
+function errMsg(e) {
+  var m = (e && (e.message || e.name)) || String(e);
+  if (/quota/i.test(m)) return 'iPhoneの空き容量が足りないため保存できませんでした';
+  return m;
+}
+
+/* ===== 保存場所（IndexedDB） ===== */
+var db = null;
+function openDB() {
+  return new Promise(function (res, rej) {
+    var r = indexedDB.open(DB_NAME, 1);
+    r.onupgradeneeded = function () {
+      var d = r.result;
+      if (!d.objectStoreNames.contains('items')) d.createObjectStore('items', { keyPath: 'id' });
+      if (!d.objectStoreNames.contains('prices')) d.createObjectStore('prices', { keyPath: 'id' });
+      if (!d.objectStoreNames.contains('settings')) d.createObjectStore('settings', { keyPath: 'key' });
+    };
+    r.onsuccess = function () { res(r.result); };
+    r.onerror = function () { rej(r.error); };
+  });
+}
+function reqP(r) { return new Promise(function (res, rej) { r.onsuccess = function () { res(r.result); }; r.onerror = function () { rej(r.error); }; }); }
+function doneP(t) { return new Promise(function (res, rej) { t.oncomplete = function () { res(); }; t.onerror = function () { rej(t.error); }; t.onabort = function () { rej(t.error || new Error('保存が中断されました')); }; }); }
+function dbAll(store) { return reqP(db.transaction(store).objectStore(store).getAll()); }
+function dbWrite(stores, fn) { var t = db.transaction(stores, 'readwrite'); fn(t); return doneP(t); }
+
+var items = [], prices = [];
+var settings = { lastBackupAt: 0, backupRemind: true, remindSnoozeUntil: 0, favShops: [], lastShop: '', taxMode: 'in', period: 365, persistAsked: false };
+function loadSettings() { return dbAll('settings').then(function (all) { all.forEach(function (s) { settings[s.key] = s.value; }); }); }
+function saveSetting(key, value) { settings[key] = value; return dbWrite(['settings'], function (t) { t.objectStore('settings').put({ key: key, value: value }); }); }
+function reloadAll() {
+  return Promise.all([dbAll('items'), dbAll('prices')]).then(function (r) { items = r[0]; prices = r[1]; });
+}
+function itemById(id) { for (var i = 0; i < items.length; i++) if (items[i].id === id) return items[i]; return null; }
+function pricesOf(itemId) { return prices.filter(function (p) { return p.itemId === itemId; }); }
+function putItem(it) {
+  return dbWrite(['items'], function (t) { t.objectStore('items').put(it); }).then(function () {
+    var i = items.findIndex(function (x) { return x.id === it.id; });
+    if (i >= 0) items[i] = it; else items.push(it);
+  });
+}
+function putPrice(p) {
+  return dbWrite(['prices'], function (t) { t.objectStore('prices').put(p); }).then(function () {
+    var i = prices.findIndex(function (x) { return x.id === p.id; });
+    if (i >= 0) prices[i] = p; else prices.push(p);
+  });
+}
+function delPrice(id) {
+  return dbWrite(['prices'], function (t) { t.objectStore('prices').delete(id); }).then(function () {
+    prices = prices.filter(function (x) { return x.id !== id; });
+    return saveSetting('lastDeleteAt', Date.now());
+  });
+}
+function delItem(id) {
+  var ps = pricesOf(id);
+  return dbWrite(['items', 'prices'], function (t) {
+    t.objectStore('items').delete(id);
+    ps.forEach(function (p) { t.objectStore('prices').delete(p.id); });
+  }).then(function () {
+    items = items.filter(function (x) { return x.id !== id; });
+    prices = prices.filter(function (x) { return x.itemId !== id; });
+    return saveSetting('lastDeleteAt', Date.now());
+  });
+}
+async function askPersist() {
+  try { if (navigator.storage && navigator.storage.persist) return await navigator.storage.persist(); } catch (e) {}
+  return false;
+}
+
+/* ===== 計算と判定 ===== */
+// 値札の数字から、実際に払う税込の金額を出す（割引は税抜・税込どちらの値札にもそのままかける）
+function calcPay(raw, taxMode, rate, discType, discVal) {
+  if (!(raw > 0)) return NaN;
+  var p = raw;
+  if (discType === 'pct') { if (!(discVal >= 0 && discVal < 100)) return NaN; p = p * (1 - discVal / 100); }
+  else if (discType === 'yen') { if (!(discVal >= 0)) return NaN; p = p - discVal; }
+  if (taxMode === 'ex') p = p * (1 + rate / 100);
+  p = Math.floor(p + 1e-6);
+  return p > 0 ? p : NaN;
+}
+function unitPriceOf(pay, size, count, item) {
+  var q = size * (count || 1);
+  if (!(pay > 0) || !(q > 0)) return NaN;
+  return pay / q * unitOf(item).base;
+}
+function recUnit(r, item) { return unitPriceOf(r.price, r.size, r.count, item); }
+function cutoffStr() {
+  var d = Number(settings.period) || 0;
+  if (!d) return '';
+  var c = new Date(); c.setDate(c.getDate() - d);
+  return dateStr(c);
+}
+function periodLabel() {
+  var d = Number(settings.period) || 0;
+  for (var i = 0; i < PERIODS.length; i++) if (PERIODS[i].d === d) return PERIODS[i].label;
+  return d + '日';
+}
+function sortByNew(a, b) { return a.date < b.date ? 1 : a.date > b.date ? -1 : (b.createdAt || 0) - (a.createdAt || 0); }
+// 判定に使う記録と、その最安・平均・前回
+function statsOf(item, excludeId) {
+  var all = pricesOf(item.id).filter(function (p) { return p.id !== excludeId && recUnit(p, item) > 0; });
+  var cut = cutoffStr();
+  var refs = cut ? all.filter(function (p) { return p.date >= cut; }) : all;
+  if (!refs.length) return { n: 0, older: all.length };
+  refs.sort(sortByNew);
+  var minR = null, minU = Infinity, sum = 0;
+  refs.forEach(function (p) { var u = recUnit(p, item); sum += u; if (u < minU - 1e-9) { minU = u; minR = p; } });
+  return { n: refs.length, older: all.length - refs.length, min: minU, minRec: minR, avg: sum / refs.length, last: refs[0], lastU: recUnit(refs[0], item), refs: refs };
+}
+function judge(u, st) {
+  if (!st || !st.n || !(u > 0)) return null;
+  if (u < st.min * 0.995) return 'best';
+  if (u <= st.min * 1.03 || u <= st.avg * 0.97) return 'low';
+  if (u <= st.avg * 1.05) return 'mid';
+  return 'high';
+}
+// サイズ（内容量×個数）ごとの最安単価
+function sizeGroups(item, refs) {
+  var map = new Map();
+  refs.forEach(function (p) {
+    var key = fmtQty(p.size) + 'x' + fmtQty(p.count || 1);
+    var u = recUnit(p, item), g = map.get(key);
+    if (!g) { g = { rec: p, u: u, n: 0 }; map.set(key, g); }
+    g.n++;
+    if (u < g.u) { g.u = u; g.rec = p; }
+  });
+  return Array.from(map.values()).sort(function (a, b) { return a.u - b.u; });
+}
+
+/* ===== お知らせ（画面下の小さな表示） ===== */
+var toastQ = [], toastBusy = false;
+function toast(msg, kind) { toastQ.push({ msg: msg }); if (!toastBusy) nextToast(); }
+function nextToast() {
+  var t = toastQ.shift(), el = $('#toast');
+  if (!t) { toastBusy = false; return; }
+  toastBusy = true;
+  var multi = t.msg.indexOf('\n') >= 0 ? ' multi' : '';
+  el.textContent = t.msg; el.className = 'toast show' + multi;
+  setTimeout(function () { el.className = 'toast' + multi; setTimeout(nextToast, 250); }, Math.max(1900, t.msg.length * 110));
+}
+
+/* ===== シート（下から出る画面） ===== */
+var sheet = $('#sheet'), sheetCleanup = null, sheetBack = null;
+function openSheet(title, body, foot, back) {
+  if (sheetCleanup) { try { sheetCleanup(); } catch (e) {} sheetCleanup = null; }
+  sheetBack = back || null;
+  sheet.innerHTML = '<div class="sheet-panel"><div class="sheet-head"><button class="link" data-close>' + (back ? '戻る' : '閉じる') + '</button><div class="sheet-title">' + esc(title) + '</div><span></span></div>' +
+    '<div class="sheet-body">' + body + '</div><div class="sheet-foot">' + (foot || '') + '</div></div>';
+  sheet.classList.remove('hidden');
+  document.body.classList.add('sheet-open');
+  requestAnimationFrame(function () { requestAnimationFrame(function () { sheet.classList.add('show'); }); });
+}
+function setSheetBody(html, foot) {
+  var b = $('.sheet-body', sheet), f = $('.sheet-foot', sheet);
+  if (b) { b.innerHTML = html; b.scrollTop = 0; }
+  if (f) f.innerHTML = foot || '';
+}
+function closeSheet(force) {
+  if (sheet.dataset.lock && !force) return;
+  if (sheetCleanup) { try { sheetCleanup(); } catch (e) {} sheetCleanup = null; }
+  if (sheetBack && !force) { var b = sheetBack; sheetBack = null; b(); return; }
+  sheetBack = null;
+  sheet.classList.remove('show');
+  document.body.classList.remove('sheet-open');
+  setTimeout(function () { if (!sheet.classList.contains('show')) { sheet.classList.add('hidden'); sheet.innerHTML = ''; } }, 260);
+}
+sheet.addEventListener('click', function (e) {
+  if (e.target === sheet) { closeSheet(true); return; }
+  if (e.target.closest('[data-close]')) closeSheet();
+});
+
+/* ===== 画面の切り替え ===== */
+var tab = 'check';
+function render() {
+  var v = $('#view');
+  $$('.tabs [data-tab]').forEach(function (b) { b.classList.toggle('on', b.dataset.tab === tab); });
+  if (tab === 'check') renderCheck(v);
+  else if (tab === 'items') renderItems(v);
+  else renderSettings(v);
+}
+function goTab(t) { tab = t; render(); $('#view').scrollTop = 0; }
+$$('.tabs [data-tab]').forEach(function (b) { b.addEventListener('click', function () { goTab(b.dataset.tab); }); });
+
+function favShops() { return Array.isArray(settings.favShops) ? settings.favShops : []; }
+function shopCandidates() {
+  var list = favShops().slice();
+  var past = prices.slice().sort(sortByNew);
+  past.forEach(function (p) { if (p.shop && list.indexOf(p.shop) < 0 && list.length < 12) list.push(p.shop); });
+  return list;
+}
+function unsavedCount() {
+  var t = settings.lastBackupAt || 0;
+  return items.filter(function (r) { return (r.updatedAt || 0) > t; }).length + prices.filter(function (r) { return (r.updatedAt || 0) > t; }).length;
+}
+function backupNotice() {
+  if (settings.backupRemind === false) return 0;
+  var n = unsavedCount();
+  return n >= REMIND_COUNT ? n : 0;
+}
+
+/* ===== チェック画面 ===== */
+var ck = { itemId: '', q: '', price: '', taxMode: null, size: '', count: 1, discType: 'none', discVal: '', shop: null, memo: '' };
+function recentItems() {
+  return items.slice().sort(function (a, b) { return (b.lastUsedAt || 0) - (a.lastUsedAt || 0); });
+}
+function renderCheck(v) {
+  if (ck.taxMode == null) ck.taxMode = settings.taxMode === 'ex' ? 'ex' : 'in';
+  if (ck.shop == null) ck.shop = settings.lastShop || '';
+  var item = itemById(ck.itemId);
+  var notice = backupNotice();
+  var html = notice ? '<button class="notice" data-act="remind"><span>まだバックアップしていない記録が <b>' + notice + '件</b> あります</span><span class="go">保存する</span></button>' : '';
+  if (!item) {
+    ck.itemId = '';
+    html += '<section class="card"><div class="field"><label for="ckQ">どの商品を調べますか？</label>' +
+      '<input type="search" class="search" id="ckQ" placeholder="商品名を入れて探す（例：レノア）" value="' + esc(ck.q) + '" autocomplete="off" enterkeyhint="search"></div>' +
+      '<div id="ckList"></div></section>';
+    if (!items.length) {
+      html += '<section class="card help"><h3>使い方</h3>' +
+        '<p>1. お店で気になった商品の名前を上の欄に入れて、商品を登録します。</p>' +
+        '<p>2. 値札の値段と、パッケージに書いてある内容量（mLやg）を入れます。「2.4倍」のような倍率の表示は気にしなくて大丈夫です。</p>' +
+        '<p>3. 「買った」か「見ただけ」で記録します。記録がたまるほど、安いか高いかの判定ができるようになります。</p></section>';
+    }
+    v.innerHTML = html;
+    var q = $('#ckQ');
+    q.addEventListener('input', function () { ck.q = q.value; renderPickList(); });
+    renderPickList();
+    return;
+  }
+  var u = unitOf(item);
+  html += '<section class="card"><div class="chosen"><div class="nm"><b>' + esc(item.name) + '</b><small>' + perLabel(item) + 'で比べます・消費税' + item.tax + '％</small></div>' +
+    '<button class="mini" data-act="ck-detail">履歴</button><button class="mini" data-act="ck-change">変更</button></div></section>' +
+    '<section class="card">' +
+    '<div class="field"><label for="ckPrice">値札の値段</label><div class="price-row"><div class="unit-in"><input type="text" inputmode="decimal" class="inp num" id="ckPrice" value="' + esc(ck.price) + '" placeholder="0" autocomplete="off"><span>円</span></div>' +
+    '<div class="seg" id="ckTax"><button data-v="in"' + (ck.taxMode === 'in' ? ' class="on"' : '') + '>税込</button><button data-v="ex"' + (ck.taxMode === 'ex' ? ' class="on"' : '') + '>税抜</button></div></div></div>' +
+    '<div class="field"><label for="ckSize">内容量（1個あたり）と個数</label><div class="size-row"><div class="unit-in"><input type="text" inputmode="decimal" class="inp num" id="ckSize" value="' + esc(ck.size) + '" placeholder="0" autocomplete="off"><span>' + esc(u.label) + '</span></div>' +
+    '<div class="stepper"><button data-act="cnt-" aria-label="個数を減らす">−</button><output id="ckCount">×' + ck.count + '</output><button data-act="cnt+" aria-label="個数を増やす">＋</button></div></div>' +
+    '<div class="note">' + (u.k === 'ml' ? '1.5Lなら1500と入れます。' : u.k === 'g' ? '1kgなら1000と入れます。' : '1パックに入っている数を入れます。') + 'まとめ売り（例：3個パック）のときは、右の個数を増やします。</div></div>' +
+    '<div class="field"><span class="lbl">割引</span><div class="seg" id="ckDisc"><button data-v="none"' + (ck.discType === 'none' ? ' class="on"' : '') + '>なし</button><button data-v="pct"' + (ck.discType === 'pct' ? ' class="on"' : '') + '>％引き</button><button data-v="yen"' + (ck.discType === 'yen' ? ' class="on"' : '') + '>円引き</button></div>' +
+    '<div class="unit-in' + (ck.discType === 'none' ? ' hidden' : '') + '" id="ckDiscBox" style="margin-top:8px"><input type="text" inputmode="decimal" class="inp num" id="ckDiscVal" value="' + esc(ck.discVal) + '" placeholder="0" autocomplete="off"><span id="ckDiscUnit">' + (ck.discType === 'yen' ? '円' : '％') + '</span></div></div>' +
+    '</section>' +
+    '<div id="ckResult"></div>' +
+    '<section class="card" id="ckSave"><div class="field"><span class="lbl">お店</span>' + shopChipsHTML(ck.shop, 'ck-shop') +
+    '<input type="text" class="inp" id="ckShop" value="' + esc(ck.shop) + '" placeholder="お店の名前（なくてもOK）" autocomplete="off"></div>' +
+    '<div class="field"><label for="ckMemo">メモ（香り・種類など）</label><input type="text" class="inp" id="ckMemo" value="' + esc(ck.memo) + '" placeholder="なくてもOK" autocomplete="off"></div>' +
+    '<div class="save-btns"><button class="btn primary" data-act="save" data-kind="bought">買った</button><button class="btn ghost" data-act="save" data-kind="seen">見ただけ</button></div>' +
+    '<div class="note small sub" style="margin-top:8px">見ただけの値段も記録しておくと、相場が分かりやすくなります。</div></section>';
+  v.innerHTML = html;
+  bindNum('#ckPrice', 'price'); bindNum('#ckSize', 'size'); bindNum('#ckDiscVal', 'discVal');
+  $('#ckShop').addEventListener('input', function (e) { ck.shop = e.target.value; syncChips('ck-shop', ck.shop); });
+  $('#ckMemo').addEventListener('input', function (e) { ck.memo = e.target.value; });
+  $$('#ckTax button').forEach(function (b) { b.addEventListener('click', function () { ck.taxMode = b.dataset.v; segOn('#ckTax', b); saveSetting('taxMode', ck.taxMode).catch(function () {}); updateResult(); }); });
+  $$('#ckDisc button').forEach(function (b) {
+    b.addEventListener('click', function () {
+      ck.discType = b.dataset.v; segOn('#ckDisc', b);
+      $('#ckDiscBox').classList.toggle('hidden', ck.discType === 'none');
+      $('#ckDiscUnit').textContent = ck.discType === 'yen' ? '円' : '％';
+      if (ck.discType !== 'none') $('#ckDiscVal').focus();
+      updateResult();
+    });
+  });
+  updateResult();
+}
+function segOn(sel, btn) { $$(sel + ' button').forEach(function (x) { x.classList.toggle('on', x === btn); }); }
+function bindNum(sel, key) {
+  var el = $(sel); if (!el) return;
+  el.addEventListener('input', function () { ck[key] = el.value; updateResult(); });
+  el.addEventListener('blur', function () { var n = normNumText(el.value); if (n !== el.value) { el.value = n; ck[key] = n; } });
+}
+// 全角で入った数字を、欄から離れたときに半角にそろえる
+function normNumText(v) { return String(v || '').normalize('NFKC').replace(/[\s,円]/g, ''); }
+document.addEventListener('blur', function (e) {
+  var t = e.target;
+  if (t && t.tagName === 'INPUT' && t.getAttribute('inputmode') === 'decimal' && !t.id.indexOf('rf')) t.value = normNumText(t.value);
+}, true);
+function shopChipsHTML(cur, act) {
+  var list = shopCandidates();
+  if (!list.length) return '';
+  return '<div class="chips" data-chips="' + act + '">' + list.map(function (s) { return '<button class="chip' + (s === cur ? ' on' : '') + '" data-act="' + act + '" data-shop="' + esc(s) + '">' + esc(s) + '</button>'; }).join('') + '</div>';
+}
+function syncChips(act, cur) { $$('[data-chips="' + act + '"] .chip').forEach(function (c) { c.classList.toggle('on', c.dataset.shop === cur); }); }
+function renderPickList() {
+  var box = $('#ckList'); if (!box) return;
+  var q = norm(ck.q), list;
+  if (q) list = items.filter(function (it) { return norm(it.name + ' ' + (it.memo || '')).indexOf(q) >= 0; }).sort(function (a, b) { return (b.lastUsedAt || 0) - (a.lastUsedAt || 0); });
+  else list = recentItems();
+  var html = '';
+  if (list.length) {
+    html += '<div class="sec-title">' + (q ? '見つかった商品' : '最近使った商品') + '</div><div class="pick-list">' +
+      list.slice(0, q ? 20 : 8).map(function (it) {
+        var n = pricesOf(it.id).length;
+        return '<button class="pick" data-act="pick" data-id="' + it.id + '"><b>' + esc(it.name) + '</b><small>' + n + '件の記録</small></button>';
+      }).join('') + '</div>';
+  } else if (q) {
+    html += '<div class="sec-title">まだ登録されていない商品です</div>';
+  }
+  html += '<div class="pick-list" style="margin-top:' + (list.length ? '4px' : '8px') + '"><button class="pick new" data-act="new-item">＋ ' + (ck.q.trim() ? '「' + esc(ck.q.trim()) + '」を' : '') + '新しい商品として登録</button></div>';
+  box.innerHTML = html;
+}
+function currentCalc() {
+  var item = itemById(ck.itemId); if (!item) return null;
+  var raw = num(ck.price), size = num(ck.size), cnt = ck.count || 1;
+  var dv = ck.discType === 'none' ? 0 : num(ck.discVal);
+  if (ck.discType !== 'none' && !(dv >= 0)) dv = 0;
+  var pay = calcPay(raw, ck.taxMode, item.tax, ck.discType, dv);
+  var u = unitPriceOf(pay, size, cnt, item);
+  return { item: item, raw: raw, size: size, count: cnt, discVal: dv, pay: pay, u: u };
+}
+function updateResult() {
+  var box = $('#ckResult'); if (!box) return;
+  var c = currentCalc(); if (!c) return;
+  var item = c.item, unit = unitOf(item);
+  if (!(c.u > 0)) {
+    var why = '値段と内容量を入れると、安いか高いかを判定します';
+    if (c.raw > 0 && c.size > 0 && !(c.pay > 0)) why = '割引の数字を確認してください';
+    box.innerHTML = '<div class="result wait">' + why + '</div>';
+    return;
+  }
+  var st = statsOf(item, null), lv = judge(c.u, st);
+  var qty = c.size * c.count;
+  var html = '<div class="result ' + (lv || '') + '">';
+  if (lv) html += '<div class="verdict">' + LEVELS[lv].t + '</div><div class="verdict-sub">' + LEVELS[lv].s + '</div>';
+  html += '<div class="unitp"><span class="lb">' + perLabel(item) + '</span><span class="v num">' + fmtUnit(c.u) + '<span>円</span></span></div>' +
+    '<div class="pay">支払う金額 ' + yen(c.pay) + '円（税込）・合計 ' + fmtQty(qty) + unit.label + '</div>';
+  if (!st.n) {
+    html += '<div class="first-note">' + (st.older ? 'この' + periodLabel() + 'の記録がまだありません（それより前の記録が' + st.older + '件あります）。' : 'この商品の、はじめての記録です。') + '記録しておくと、次から判定できます。</div>';
+  } else {
+    var diff = (c.u / st.lastU - 1) * 100;
+    var diffTxt = Math.abs(diff) < 0.5 ? '同じくらい' : (diff > 0 ? '+' : '−') + Math.abs(diff).toFixed(0) + '％';
+    html += '<div class="facts">' +
+      '<div class="fact"><span>これまでの最安値</span><b class="num">' + fmtUnit(st.min) + '円<small>' + fmtDateShort(st.minRec.date) + (st.minRec.shop ? '・' + esc(st.minRec.shop) : '') + '・' + sizeLabel(st.minRec, item) + '</small></b></div>' +
+      '<div class="fact"><span>平均（' + st.n + '件）</span><b class="num">' + fmtUnit(st.avg) + '円</b></div>' +
+      '<div class="fact"><span>前回</span><b class="num">' + fmtUnit(st.lastU) + '円<small>今回は ' + diffTxt + '</small></b></div>' +
+      '</div>';
+    if (lv !== 'best') {
+      var tIn = Math.floor(st.min * qty / unit.base + 1e-6);
+      var tEx = Math.floor(tIn / (1 + item.tax / 100) + 1e-6);
+      html += '<div class="target">この量なら <b class="num">' + yen(tIn) + '円</b>（税込' + (ck.taxMode === 'ex' ? '・税抜' + yen(tEx) + '円' : '') + '）以下で、最安値と同じ単価です。</div>';
+    }
+    var gs = sizeGroups(item, st.refs);
+    var curKey = fmtQty(c.size) + 'x' + fmtQty(c.count);
+    if (gs.length >= 2 || (gs.length === 1 && fmtQty(gs[0].rec.size) + 'x' + fmtQty(gs[0].rec.count || 1) !== curKey)) {
+      html += '<div class="sizes"><h4>サイズ別の最安単価（' + perLabel(item) + '）</h4>' +
+        gs.slice(0, 6).map(function (g, i) {
+          return '<div class="srow' + (i === 0 && gs.length > 1 ? ' cheap' : '') + '"><span class="s">' + sizeLabel(g.rec, item) + '</span><span class="u num">' + fmtUnit(g.u) + '円</span><span class="d">' + fmtDate(g.rec.date) + '</span></div>';
+        }).join('') + '</div>';
+    }
+    if (st.older) html += '<div class="period-note">判定には直近' + periodLabel() + 'の記録を使っています（設定で変えられます）。</div>';
+  }
+  html += '</div>';
+  box.innerHTML = html;
+}
+async function saveCheck(kind) {
+  var c = currentCalc(); if (!c) return;
+  if (!(c.raw > 0)) { toast('値段を入れてください'); $('#ckPrice').focus(); return; }
+  if (!(c.size > 0)) { toast('内容量を入れてください'); $('#ckSize').focus(); return; }
+  if (!(c.pay > 0)) { toast('割引の数字を確認してください'); return; }
+  var now = Date.now(), shop = (ck.shop || '').trim();
+  var rec = {
+    id: uid(), itemId: c.item.id, date: todayStr(), shop: shop, size: c.size, count: c.count, price: c.pay,
+    kind: kind, memo: (ck.memo || '').trim(),
+    raw: { price: c.raw, taxMode: ck.taxMode, discType: ck.discType, discVal: ck.discType === 'none' ? 0 : c.discVal },
+    createdAt: now, updatedAt: now
+  };
+  try {
+    await putPrice(rec);
+    await putItem(Object.assign({}, c.item, { lastUsedAt: now }));
+    if (shop !== settings.lastShop) saveSetting('lastShop', shop).catch(function () {});
+  } catch (e) { alert(errMsg(e)); return; }
+  if (!settings.persistAsked) { saveSetting('persistAsked', true).catch(function () {}); askPersist(); }
+  ck.price = ''; ck.discType = 'none'; ck.discVal = ''; ck.memo = '';
+  toast(kind === 'bought' ? '「買った」で記録しました' : '「見ただけ」で記録しました');
+  render();
+}
+
+/* ===== 商品の一覧 ===== */
+var listQ = '';
+function renderItems(v) {
+  var notice = backupNotice();
+  v.innerHTML = (notice ? '<button class="notice" data-act="remind"><span>まだバックアップしていない記録が <b>' + notice + '件</b> あります</span><span class="go">保存する</span></button>' : '') +
+    '<div class="head-row"><input type="search" class="search" id="itQ" placeholder="商品を探す" value="' + esc(listQ) + '" autocomplete="off"><button class="mini" data-act="new-item-list" style="padding:12px 12px">＋登録</button></div>' +
+    '<div id="itList"></div>';
+  $('#itQ').addEventListener('input', function (e) { listQ = e.target.value; renderItemList(); });
+  renderItemList();
+}
+function renderItemList() {
+  var box = $('#itList'); if (!box) return;
+  if (!items.length) { box.innerHTML = '<div class="empty"><b>まだ商品がありません</b>「チェック」の画面で商品名を入れると登録できます。</div>'; return; }
+  var q = norm(listQ);
+  var list = recentItems().filter(function (it) { return !q || norm(it.name + ' ' + (it.memo || '')).indexOf(q) >= 0; });
+  if (!list.length) { box.innerHTML = '<div class="empty">見つかりませんでした</div>'; return; }
+  box.innerHTML = list.map(function (it) {
+    var st = statsOf(it, null), n = pricesOf(it.id).length;
+    return '<button class="item" data-act="open-item" data-id="' + it.id + '"><div style="min-width:0"><div class="nm">' + esc(it.name) + '</div><div class="mt">' + n + '件の記録' + (st.n ? '・前回 ' + fmtDateShort(st.last.date) : '') + '</div></div>' +
+      '<div class="rt num">' + (st.n ? fmtUnit(st.min) + '円<small>最安（' + perLabel(it) + '）</small>' : '<small>判定用の記録なし</small>') + '</div></button>';
+  }).join('');
+}
+
+/* ===== 商品の詳細 ===== */
+function chartSVG(item, recs, st) {
+  var pts = recs.map(function (p) { return { t: parseDate(p.date).getTime() + (p.createdAt || 0) % 86400000 / 10, u: recUnit(p, item), k: p.kind }; })
+    .filter(function (p) { return p.u > 0; }).sort(function (a, b) { return a.t - b.t; });
+  if (pts.length < 2) return '';
+  var W = 320, H = 150, L = 46, R = 10, T = 12, B = 22;
+  var t0 = pts[0].t, t1 = pts[pts.length - 1].t;
+  var umin = Math.min.apply(null, pts.map(function (p) { return p.u; })), umax = Math.max.apply(null, pts.map(function (p) { return p.u; }));
+  if (umax - umin < umax * 0.02) { var mid = (umax + umin) / 2; umin = mid * 0.97; umax = mid * 1.03; }
+  var padU = (umax - umin) * 0.12; umin -= padU; umax += padU;
+  function x(t) { return t1 === t0 ? (L + (W - L - R) / 2) : L + (t - t0) / (t1 - t0) * (W - L - R); }
+  function y(u) { return T + (umax - u) / (umax - umin) * (H - T - B); }
+  var line = pts.map(function (p, i) { return (i ? 'L' : 'M') + x(p.t).toFixed(1) + ' ' + y(p.u).toFixed(1); }).join(' ');
+  // 点線は「判定に使っている最安値」（期間内の記録がなければ表示しない）
+  var minU = st && st.n ? st.min : NaN;
+  var minLine = minU > 0 ? '<line x1="' + L + '" y1="' + y(minU).toFixed(1) + '" x2="' + (W - R) + '" y2="' + y(minU).toFixed(1) + '" stroke="var(--best)" stroke-dasharray="4 4" stroke-width="1.2"/>' +
+    '<text x="' + (L - 6) + '" y="' + (y(minU) + 4).toFixed(1) + '" text-anchor="end" font-size="10" fill="var(--best)">' + fmtUnit(minU) + '</text>' : '';
+  var lowU = Math.min.apply(null, pts.map(function (p) { return p.u; }));
+  var lowLabel = !(minU > 0) || Math.abs(y(lowU) - y(minU)) > 12 ? '<text x="' + (L - 6) + '" y="' + (H - B) + '" text-anchor="end" font-size="10" fill="var(--sub)">' + fmtUnit(umin + padU) + '</text>' : '';
+  var d0 = new Date(t0), d1 = new Date(t1);
+  function dl(d) { return d.getFullYear() + '/' + (d.getMonth() + 1) + '/' + d.getDate(); }
+  return '<div class="chart"><svg viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="単価の移り変わり">' +
+    '<line x1="' + L + '" y1="' + (H - B) + '" x2="' + (W - R) + '" y2="' + (H - B) + '" stroke="var(--line)"/>' +
+    minLine + lowLabel +
+    '<text x="' + (L - 6) + '" y="' + (T + 8) + '" text-anchor="end" font-size="10" fill="var(--sub)">' + fmtUnit(umax - padU) + '</text>' +
+    '<path d="' + line + '" fill="none" stroke="var(--pri)" stroke-width="1.6" stroke-linejoin="round" opacity=".55"/>' +
+    pts.map(function (p) {
+      return p.k === 'seen'
+        ? '<circle cx="' + x(p.t).toFixed(1) + '" cy="' + y(p.u).toFixed(1) + '" r="4" fill="var(--surface)" stroke="var(--pri)" stroke-width="1.6"/>'
+        : '<circle cx="' + x(p.t).toFixed(1) + '" cy="' + y(p.u).toFixed(1) + '" r="4.2" fill="var(--pri)"/>';
+    }).join('') +
+    '<text x="' + L + '" y="' + (H - 6) + '" font-size="10" fill="var(--sub)">' + dl(d0) + '</text>' +
+    (t1 !== t0 ? '<text x="' + (W - R) + '" y="' + (H - 6) + '" font-size="10" text-anchor="end" fill="var(--sub)">' + dl(d1) + '</text>' : '') +
+    '</svg><div class="legend"><span>●買った</span><span>○見ただけ</span>' + (minU > 0 ? '<span style="color:var(--best)">┅最安値（直近' + periodLabel() + '）</span>' : '') + '</div></div>';
+}
+function openItemDetail(id) {
+  var item = itemById(id); if (!item) return;
+  var recs = pricesOf(id).sort(sortByNew), st = statsOf(item, null);
+  var body =
+    '<div class="sub small">' + perLabel(item) + 'で比べます・消費税' + item.tax + '％' + (item.memo ? '<br>' + esc(item.memo) : '') + '</div>' +
+    (st.n ? '<div class="kpis" style="margin-top:12px"><div class="kpi"><div class="k">最安値</div><div class="v num">' + fmtUnit(st.min) + '<span>円</span></div></div>' +
+      '<div class="kpi"><div class="k">平均</div><div class="v num">' + fmtUnit(st.avg) + '<span>円</span></div></div>' +
+      '<div class="kpi"><div class="k">前回</div><div class="v num">' + fmtUnit(st.lastU) + '<span>円</span></div></div></div>' +
+      '<div class="small sub" style="margin-top:6px">' + perLabel(item) + 'の値段。直近' + periodLabel() + 'の記録（' + st.n + '件）から計算しています。</div>' : '') +
+    (recs.length >= 2 ? '<section class="card"><h3>単価の移り変わり</h3>' + chartSVG(item, recs, st) + '</section>' : '') +
+    '<section class="card"><h3>記録（' + recs.length + '件）</h3>' +
+    (recs.length ? recs.map(function (p) {
+      return '<button class="rec" data-act="edit-rec" data-id="' + p.id + '"><div class="l"><b>' + fmtDateShort(p.date) + '</b> <span class="tag ' + (p.kind === 'seen' ? 'seen">見ただけ' : 'bought">買った') + '</span>' +
+        '<small>' + esc(p.shop || 'お店の記録なし') + '・' + sizeLabel(p, item) + '</small>' + (p.memo ? '<div class="memo">' + esc(p.memo) + '</div>' : '') + '</div>' +
+        '<div class="r num">' + fmtUnit(recUnit(p, item)) + '円<small>' + yen(p.price) + '円（税込）</small></div></button>';
+    }).join('') : '<div class="sub small">まだ記録がありません</div>') +
+    '<button class="btn ghost block" style="margin-top:10px" data-act="add-rec">昔の記録を追加する</button></section>' +
+    '<section class="card"><button class="btn ghost block" data-act="edit-item">商品名・単位を直す</button><button class="btn danger block" data-act="del-item">この商品を削除</button></section>';
+  openSheet(item.name, body, '<button class="btn primary block" data-act="check-item">この商品でチェックする</button>');
+  sheet.dataset.item = id;
+}
+
+/* ===== 商品の登録・編集 ===== */
+function openItemForm(item, presetName, onDone, back) {
+  var it = item ? Object.assign({}, item) : { name: presetName || '', unit: 'ml', tax: 10, memo: '' };
+  var hasRecs = item && pricesOf(item.id).length > 0;
+  var body =
+    '<div class="field"><label for="ifName">商品名</label><input type="text" class="inp" id="ifName" value="' + esc(it.name) + '" placeholder="例：レノア 消臭ビーズ" autocomplete="off">' +
+    '<div class="note">サイズ違いや香り違いは、同じ商品として登録するのがおすすめです。サイズ別の比較もできます。</div></div>' +
+    '<div class="field"><span class="lbl">比べる単位</span><div class="chips" id="ifUnit">' + UNITS.map(function (u) { return '<button class="chip' + (u.k === it.unit ? ' on' : '') + '" data-v="' + u.k + '">' + u.label + '</button>'; }).join('') + '</div>' +
+    '<div class="note" id="ifUnitNote"></div></div>' +
+    '<div class="field"><span class="lbl">消費税</span><div class="seg" id="ifTax"><button data-v="10"' + (it.tax === 10 ? ' class="on"' : '') + '>10％（日用品など）</button><button data-v="8"' + (it.tax === 8 ? ' class="on"' : '') + '>8％（食品）</button></div>' +
+    '<div class="note">税抜の値札を税込に直すときに使います。</div></div>' +
+    '<div class="field"><label for="ifMemo">メモ</label><input type="text" class="inp" id="ifMemo" value="' + esc(it.memo || '') + '" placeholder="なくてもOK" autocomplete="off"></div>';
+  openSheet(item ? '商品を直す' : '商品を登録', body, '<button class="btn primary block" id="ifSave">' + (item ? '保存する' : '登録する') + '</button>', back);
+  function unitNote() {
+    var u = unitOf(it);
+    $('#ifUnitNote').textContent = u.base + u.label + 'あたりの値段で比べます。' + (hasRecs && u.k !== item.unit ? '今ある記録の数字はそのままで、単位だけが変わります。' : '');
+  }
+  unitNote();
+  $$('#ifUnit .chip').forEach(function (b) { b.addEventListener('click', function () { it.unit = b.dataset.v; $$('#ifUnit .chip').forEach(function (x) { x.classList.toggle('on', x === b); }); unitNote(); }); });
+  $$('#ifTax button').forEach(function (b) { b.addEventListener('click', function () { it.tax = Number(b.dataset.v); segOn('#ifTax', b); }); });
+  if (!item) setTimeout(function () { var n = $('#ifName'); if (n && !n.value) n.focus(); }, 300);
+  $('#ifSave').addEventListener('click', async function () {
+    var name = $('#ifName').value.trim();
+    if (!name) { toast('商品名を入れてください'); $('#ifName').focus(); return; }
+    var dup = items.filter(function (x) { return x.id !== it.id && norm(x.name) === norm(name); })[0];
+    if (dup && !confirm('「' + dup.name + '」はもう登録されています。別の商品として登録しますか？')) return;
+    var now = Date.now();
+    var rec = Object.assign({}, it, { name: name, memo: $('#ifMemo').value.trim(), updatedAt: now });
+    if (!item) { rec.id = uid(); rec.createdAt = now; rec.lastUsedAt = now; }
+    try { await putItem(rec); } catch (e) { alert(errMsg(e)); return; }
+    toast(item ? '保存しました' : '登録しました');
+    if (onDone) onDone(rec);
+  });
+}
+
+/* ===== 記録の追加・編集 ===== */
+function openRecordForm(item, rec, back) {
+  var r = rec ? Object.assign({}, rec) : { date: todayStr(), kind: 'bought', shop: settings.lastShop || '', size: '', count: 1, price: '', memo: '' };
+  var u = unitOf(item);
+  var body =
+    '<div class="field"><label for="rfDate">日付</label><input type="date" class="inp" id="rfDate" value="' + esc(r.date) + '" max="' + todayStr() + '"></div>' +
+    '<div class="field"><span class="lbl">種類</span><div class="seg" id="rfKind"><button data-v="bought"' + (r.kind !== 'seen' ? ' class="on"' : '') + '>買った</button><button data-v="seen"' + (r.kind === 'seen' ? ' class="on"' : '') + '>見ただけ</button></div></div>' +
+    '<div class="field"><span class="lbl">お店</span>' + shopChipsHTML(r.shop, 'rf-shop') + '<input type="text" class="inp" id="rfShop" value="' + esc(r.shop) + '" placeholder="お店の名前（なくてもOK）" autocomplete="off"></div>' +
+    '<div class="field"><label for="rfPrice">支払った金額（税込・割引のあと）</label><div class="unit-in"><input type="text" inputmode="decimal" class="inp num" id="rfPrice" value="' + esc(r.price) + '" placeholder="0" autocomplete="off"><span>円</span></div></div>' +
+    '<div class="field"><label for="rfSize">内容量（1個あたり）と個数</label><div class="size-row"><div class="unit-in"><input type="text" inputmode="decimal" class="inp num" id="rfSize" value="' + esc(r.size) + '" placeholder="0" autocomplete="off"><span>' + esc(u.label) + '</span></div>' +
+    '<div class="stepper"><button id="rfCm" aria-label="個数を減らす">−</button><output id="rfCount">×' + (r.count || 1) + '</output><button id="rfCp" aria-label="個数を増やす">＋</button></div></div></div>' +
+    '<div class="field"><label for="rfMemo">メモ（香り・種類など）</label><input type="text" class="inp" id="rfMemo" value="' + esc(r.memo || '') + '" placeholder="なくてもOK" autocomplete="off"></div>' +
+    '<div class="note small sub" id="rfUnit" style="margin-top:12px"></div>' +
+    (rec ? '<button class="btn danger block" style="margin-top:20px" id="rfDel">この記録を削除</button>' : '');
+  openSheet(rec ? '記録を直す' : '記録を追加', body, '<button class="btn primary block" id="rfSave">保存する</button>', back);
+  r.count = r.count || 1;
+  function upd() {
+    var uu = unitPriceOf(num($('#rfPrice').value), num($('#rfSize').value), r.count, item);
+    $('#rfUnit').textContent = uu > 0 ? perLabel(item) + ' ' + fmtUnit(uu) + '円' : '';
+  }
+  upd();
+  $('#rfPrice').addEventListener('input', upd); $('#rfSize').addEventListener('input', upd);
+  $('#rfShop').addEventListener('input', function (e) { r.shop = e.target.value; syncChips('rf-shop', r.shop); });
+  $$('#rfKind button').forEach(function (b) { b.addEventListener('click', function () { r.kind = b.dataset.v; segOn('#rfKind', b); }); });
+  $$('[data-chips="rf-shop"] .chip').forEach(function (b) {
+    b.addEventListener('click', function (e) {
+      e.stopPropagation();
+      r.shop = r.shop === b.dataset.shop ? '' : b.dataset.shop; $('#rfShop').value = r.shop; syncChips('rf-shop', r.shop);
+    });
+  });
+  $('#rfCm').addEventListener('click', function () { r.count = Math.max(1, r.count - 1); $('#rfCount').textContent = '×' + r.count; upd(); });
+  $('#rfCp').addEventListener('click', function () { r.count = Math.min(99, r.count + 1); $('#rfCount').textContent = '×' + r.count; upd(); });
+  $('#rfSave').addEventListener('click', async function () {
+    var price = num($('#rfPrice').value), size = num($('#rfSize').value), date = $('#rfDate').value;
+    if (!date) { toast('日付を入れてください'); return; }
+    if (!(price > 0)) { toast('金額を入れてください'); $('#rfPrice').focus(); return; }
+    if (!(size > 0)) { toast('内容量を入れてください'); $('#rfSize').focus(); return; }
+    var now = Date.now();
+    var out = Object.assign({}, r, { itemId: item.id, date: date, price: Math.round(price), size: size, shop: $('#rfShop').value.trim(), memo: $('#rfMemo').value.trim(), updatedAt: now });
+    if (!rec) { out.id = uid(); out.createdAt = now; }
+    else if (rec.price !== out.price && out.raw) delete out.raw;   // 金額を直したら、値札の情報は外す
+    try { await putPrice(out); } catch (e) { alert(errMsg(e)); return; }
+    toast('保存しました');
+    render();
+    openItemDetail(item.id);
+  });
+  if (rec) $('#rfDel').addEventListener('click', async function () {
+    if (!confirm('この記録を削除しますか？')) return;
+    try { await delPrice(rec.id); } catch (e) { alert(errMsg(e)); return; }
+    toast('削除しました');
+    render();
+    openItemDetail(item.id);
+  });
+}
+
+/* ===== 設定 ===== */
+function renderSettings(v) {
+  var unsaved = unsavedCount();
+  var hasDiff = unsaved > 0 || ((settings.lastDeleteAt || 0) > (settings.lastBackupAt || 0) && settings.lastBackupAt > 0);
+  v.innerHTML =
+    '<section class="card"><h3>判定に使う期間</h3><p class="set-desc">この期間の記録だけで「安い・高い」を判定します。物価が上がっていても、昔の安い値段に引っぱられないようにするためです。</p>' +
+    '<div class="seg" id="perSeg">' + PERIODS.map(function (p) { return '<button data-v="' + p.d + '"' + (Number(settings.period) === p.d ? ' class="on"' : '') + '>' + p.label + '</button>'; }).join('') + '</div></section>' +
+    favCardHTML() +
+    '<section class="card"><h3>バックアップ</h3>' +
+    '<p class="set-desc">記録はこのiPhoneの中にだけ保存されています。iPhoneを買い替えたときなどに備えて、ときどきバックアップを保存してください。</p>' +
+    '<div class="set-row"><span>前回のバックアップ</span><b>' + (settings.lastBackupAt ? fmtDateTime(settings.lastBackupAt) : 'まだありません') + '</b></div>' +
+    '<div class="set-row"><span>まだバックアップしていない記録</span><b>' + unsaved + '件</b></div>' +
+    '<div class="set-row"><span>データの保護</span><b id="persistState">確認中…</b></div>' +
+    '<button class="btn primary block" style="margin-top:10px" data-act="backup"' + (items.length ? '' : ' disabled') + '>' + (hasDiff || !settings.lastBackupAt ? 'バックアップを保存する' : 'もう一度バックアップを保存する') + '</button></section>' +
+    '<section class="card"><h3>バックアップのお知らせ</h3><p class="set-desc">まだバックアップしていない記録が' + REMIND_COUNT + '件たまると、アプリを開いたときにお知らせを出します。</p>' +
+    '<label class="switch-row"><span>お知らせを出す</span><input type="checkbox" id="remindToggle"' + (settings.backupRemind === false ? '' : ' checked') + '><span class="switch"></span></label></section>' +
+    '<section class="card"><h3>バックアップから戻す</h3><p class="set-desc">保存したバックアップのファイルを選ぶと、記録を取り込みます。いまある記録はそのまま残り、同じ記録は新しく直した方が使われます。</p>' +
+    '<button class="btn ghost block" data-act="restore">ファイルを選ぶ</button></section>' +
+    '<section class="card help"><h3>判定の決まり</h3>' +
+    '<p>最安値更新：これまでの最安値より安い</p><p>安め：最安値とほぼ同じ（3％以内）か、平均より3％以上安い</p><p>ふつう：平均とほぼ同じ（平均より5％高いまで）</p><p>高め：平均より5％以上高い</p>' +
+    '<p class="sub small">税抜の値札は、商品ごとの税率で税込に直し、1円未満は切り捨てて計算します。お店によって1円ずれることがあります。</p></section>' +
+    '<section class="card danger-zone"><h3>初期状態に戻す</h3><p class="set-desc">商品・記録・設定をすべて消して、ホーム画面に追加したばかりの状態に戻します。消したものは元に戻せません。</p>' +
+    '<button class="btn danger block" data-act="reset">初期状態に戻す</button></section>' +
+    '<div class="version">単価メモ ' + APP_VERSION + '</div>';
+  $$('#perSeg button').forEach(function (b) {
+    b.addEventListener('click', function () {
+      segOn('#perSeg', b);
+      saveSetting('period', Number(b.dataset.v)).then(function () { toast('判定の期間を「' + periodLabel() + '」にしました'); }).catch(function (e) { alert(errMsg(e)); });
+    });
+  });
+  if (navigator.storage && navigator.storage.persisted) {
+    navigator.storage.persisted().then(function (p) {
+      var el = $('#persistState'); if (!el) return;
+      el.innerHTML = p ? '<span class="ok-text">有効</span>' : '<button class="link" data-act="persist">有効にする</button>';
+    }).catch(function () { var el = $('#persistState'); if (el) el.textContent = '確認できません'; });
+  } else { $('#persistState').textContent = '確認できません'; }
+}
+function favCardHTML() {
+  var fav = favShops(), past = [];
+  prices.slice().sort(sortByNew).forEach(function (p) { if (p.shop && fav.indexOf(p.shop) < 0 && past.indexOf(p.shop) < 0) past.push(p.shop); });
+  return '<section class="card"><h3>よく行くお店</h3><p class="set-desc">登録したお店は、記録するときに先頭に並び、タップで選べます。</p>' +
+    (fav.length ? fav.map(function (sh, i) {
+      return '<div class="fav-row"><span class="nm">' + esc(sh) + '</span><button class="mini" data-act="fav-up" data-i="' + i + '"' + (i ? '' : ' disabled') + ' aria-label="上へ">↑</button><button class="mini del" data-act="fav-del" data-i="' + i + '">外す</button></div>';
+    }).join('') : '') +
+    '<div class="inline" style="margin-top:10px"><input type="text" class="inp" id="favIn" placeholder="お店の名前" autocomplete="off" enterkeyhint="done"><button class="btn primary" data-act="fav-add">追加</button></div>' +
+    (past.length ? '<div class="sec-title">記録にあるお店から追加</div><div class="chips">' + past.slice(0, 10).map(function (s) { return '<button class="chip" data-act="fav-add-name" data-name="' + esc(s) + '">＋ ' + esc(s) + '</button>'; }).join('') + '</div>' : '') +
+    '</section>';
+}
+function saveFav(list, msg) {
+  saveSetting('favShops', list).then(function () { if (msg) toast(msg); render(); }).catch(function (e) { alert(errMsg(e)); });
+}
+function addFav(name) {
+  name = String(name || '').trim();
+  if (!name) { toast('お店の名前を入れてください'); return; }
+  var fav = favShops().slice();
+  if (fav.indexOf(name) >= 0) { toast('もう登録されています'); return; }
+  fav.push(name); saveFav(fav, '追加しました');
+}
+
+/* ===== バックアップ ===== */
+function stampNow() { var d = new Date(); return d.getFullYear() + pad(d.getMonth() + 1) + pad(d.getDate()) + '-' + pad(d.getHours()) + pad(d.getMinutes()); }
+function buildBackup() {
+  var startedAt = Date.now();
+  var data = { app: BACKUP_APP_ID, version: APP_VERSION, createdAt: startedAt, items: items, prices: prices, settings: { favShops: favShops(), period: settings.period } };
+  var blob = new Blob([JSON.stringify(data)], { type: 'application/json' });
+  var name = '単価メモ_バックアップ_' + stampNow() + '.json', file;
+  try { file = new File([blob], name, { type: 'application/json' }); } catch (e) { file = blob; file.name = name; }
+  return { file: file, name: name, startedAt: startedAt, count: items.length, pcount: prices.length };
+}
+function finishBackup(res) {
+  return Promise.all([saveSetting('remindSnoozeUntil', 0), saveSetting('lastBackupAt', res.startedAt)]).catch(function () {}).then(function () { render(); });
+}
+async function shareBackupFile(res, dlLink) {
+  var canFile = false;
+  try { canFile = !!(navigator.canShare && navigator.share && navigator.canShare({ files: [res.file] })); } catch (e) {}
+  if (!canFile) { dlLink.click(); return null; }
+  try { await navigator.share({ files: [res.file] }); return true; }
+  catch (e) {
+    if (e && e.name === 'AbortError') toast('保存をやめました');
+    else toast('保存の画面を開けませんでした。下のリンクを試してください');
+    return false;
+  }
+}
+function openBackup(fromReminder) {
+  var n = unsavedCount(), res = buildBackup(), dlURL = URL.createObjectURL(res.file), done = false, later = false;
+  var body = '<div class="remind">' +
+    (fromReminder ? '<p class="remind-lead">記録が ' + n + '件 たまりました</p>' : '') +
+    '<p>このアプリの記録は、<b>このiPhoneの中にだけ</b>しまってあります。iPhoneを買い替えたり、このアプリを消したりすると、なくなってしまいます。</p>' +
+    '<p>なくさないように、バックアップを1つ、iPhoneの「ファイル」アプリに保存しておきましょう。</p>' +
+    '<div class="steps">' +
+    '<div class="step"><span>1</span><div>下の「バックアップを保存する」を押します</div></div>' +
+    '<div class="step"><span>2</span><div>出てきた画面で「“ファイル”に保存」を押します</div></div>' +
+    '<div class="step"><span>3</span><div>保存する場所を選んで、右上の「保存」を押します</div></div>' +
+    '</div>' +
+    '<div class="info"><dt>商品</dt><dd>' + res.count + '件</dd><dt>記録</dt><dd>' + res.pcount + '件</dd><dt>ファイル名</dt><dd>' + esc(res.name) + '</dd></div>' +
+    '<p class="hint">「このiPhone内」に保存した場合は、iPhoneをなくしたときや買い替えたときに一緒に消えてしまうので、ときどきパソコンなどにも移しておくと安心です。</p>' +
+    (fromReminder ? '<p class="hint">このお知らせは、設定の「バックアップのお知らせ」でオフにできます。</p>' : '') +
+    '<a class="link small" id="bkDl" href="' + dlURL + '" download="' + esc(res.name) + '">保存の画面が出ない場合はこちら</a>' +
+    '</div>';
+  openSheet(fromReminder ? 'バックアップをとりましょう' : 'バックアップ', body,
+    '<button class="btn primary block" id="bkSave">バックアップを保存する</button>' +
+    (fromReminder ? '<button class="btn ghost block" id="bkLater">あとで（' + SNOOZE_DAYS + '日後にまたお知らせします）</button>' : ''));
+  sheetCleanup = function () {
+    URL.revokeObjectURL(dlURL);
+    if (fromReminder && !done && !later) saveSetting('remindSnoozeUntil', Date.now() + SNOOZE_DAYS * 86400000).catch(function () {});
+  };
+  function showDone() {
+    if (done) return; done = true;
+    finishBackup(res);
+    setSheetBody('<div class="remind"><p class="remind-lead ok-text">保存できました</p><p>これで、iPhoneを買い替えたときなどにも、記録を元に戻せます。</p><p class="hint">戻すときは、設定の「バックアップから戻す」から、保存したファイルを選びます。</p></div>',
+      '<button class="btn primary block" data-close>閉じる</button>');
+  }
+  $('#bkSave').addEventListener('click', async function () { if (await shareBackupFile(res, $('#bkDl'))) showDone(); });
+  $('#bkDl').addEventListener('click', function () { setTimeout(showDone, 300); });
+  if ($('#bkLater')) $('#bkLater').addEventListener('click', function () {
+    later = true;
+    saveSetting('remindSnoozeUntil', Date.now() + SNOOZE_DAYS * 86400000).catch(function () {});
+    closeSheet(true);
+  });
+}
+function maybeShowReminder() {
+  if (!db || !backupNotice()) return;
+  if (Date.now() < (settings.remindSnoozeUntil || 0)) return;
+  if (!sheet.classList.contains('hidden')) return;
+  openBackup(true);
+}
+
+/* ===== バックアップから戻す ===== */
+function readText(file) {
+  return new Promise(function (res, rej) { var fr = new FileReader(); fr.onload = function () { res(fr.result); }; fr.onerror = function () { rej(fr.error); }; fr.readAsText(file); });
+}
+async function onRestoreFile(file) {
+  var data;
+  try {
+    data = JSON.parse(await readText(file));
+    if (!data || data.app !== BACKUP_APP_ID || !Array.isArray(data.items) || !Array.isArray(data.prices)) throw new Error('単価メモのバックアップファイルではありません');
+  } catch (e) {
+    openSheet('バックアップから戻す', '<p class="warn-text">読み込めませんでした</p><p class="hint">' + esc(e instanceof SyntaxError ? '単価メモのバックアップファイルではありません' : errMsg(e)) + '</p>', '<button class="btn block" data-close>閉じる</button>');
+    return;
+  }
+  openSheet('バックアップから戻す',
+    '<p><b>このファイルを取り込みます。</b></p>' +
+    '<div class="info"><dt>作った日時</dt><dd>' + fmtDateTime(data.createdAt) + '</dd><dt>商品</dt><dd>' + data.items.length + '件</dd><dt>記録</dt><dd>' + data.prices.length + '件</dd></div>' +
+    '<p class="hint">いまある記録は残ります。同じ記録がある場合は、新しく直した方が使われます。</p>',
+    '<button class="btn primary block" id="rsGo">取り込む</button>');
+  $('#rsGo').addEventListener('click', async function () {
+    sheet.dataset.lock = '1';
+    setSheetBody('<p>取り込んでいます…</p>', '');
+    try {
+      var c = await applyRestore(data);
+      delete sheet.dataset.lock;
+      render();
+      setSheetBody('<p class="ok-text">取り込みが終わりました。</p><div class="info"><dt>追加</dt><dd>' + c.added + '件</dd><dt>更新</dt><dd>' + c.updated + '件</dd><dt>変更なし</dt><dd>' + c.skipped + '件</dd></div>',
+        '<button class="btn primary block" data-close>閉じる</button>');
+    } catch (e) {
+      delete sheet.dataset.lock;
+      await reloadAll(); render();
+      setSheetBody('<p class="warn-text">取り込めませんでした</p><p class="hint">' + esc(errMsg(e)) + '</p>', '<button class="btn block" data-close>閉じる</button>');
+    }
+  });
+}
+async function applyRestore(data) {
+  var c = { added: 0, updated: 0, skipped: 0 };
+  var li = new Map(items.map(function (r) { return [r.id, r]; })), lp = new Map(prices.map(function (r) { return [r.id, r]; }));
+  var putI = [], putP = [];
+  data.items.forEach(function (r) {
+    if (!r || !r.id || !r.name) { c.skipped++; return; }
+    var cur = li.get(r.id);
+    if (cur && (cur.updatedAt || 0) >= (r.updatedAt || 0)) { c.skipped++; return; }
+    putI.push(r); if (cur) c.updated++; else c.added++;
+  });
+  var ids = new Set(items.map(function (x) { return x.id; }).concat(putI.map(function (x) { return x.id; })));
+  data.prices.forEach(function (r) {
+    if (!r || !r.id || !r.itemId || !r.date || !ids.has(r.itemId)) { c.skipped++; return; }
+    var cur = lp.get(r.id);
+    if (cur && (cur.updatedAt || 0) >= (r.updatedAt || 0)) { c.skipped++; return; }
+    putP.push(r); if (cur) c.updated++; else c.added++;
+  });
+  await dbWrite(['items', 'prices'], function (t) {
+    putI.forEach(function (r) { t.objectStore('items').put(r); });
+    putP.forEach(function (r) { t.objectStore('prices').put(r); });
+  });
+  var s = data.settings || {};
+  if (Array.isArray(s.favShops)) {
+    var fav = favShops().slice();
+    s.favShops.forEach(function (x) { if (x && fav.indexOf(x) < 0) fav.push(x); });
+    await saveSetting('favShops', fav);
+  }
+  await reloadAll();
+  return c;
+}
+
+/* ===== 初期状態に戻す ===== */
+function openReset() {
+  var unsaved = unsavedCount();
+  var body = '<div class="remind"><p class="remind-lead">アプリを初期状態に戻します</p>' +
+    '<p>ホーム画面に追加したばかりの状態に戻ります。次のものが<b>すべて消え、元に戻せません</b>。</p>' +
+    '<div class="lose"><div><span>商品</span><b>' + items.length + '件</b></div><div><span>記録</span><b>' + prices.length + '件</b></div><div><span>よく行くお店</span><b>' + favShops().length + '件</b></div><div><span>判定の期間などの設定</span><b>すべて</b></div></div>' +
+    '<p class="hint" style="margin-top:0">ホーム画面のアイコン、「ファイル」アプリなどに保存したバックアップ、ほかのアプリの記録は消えません。</p>' +
+    (unsaved ? '<div class="warn-box"><p>まだバックアップしていない記録が <b>' + unsaved + '件</b> あります。消す前に、バックアップをとっておくことをおすすめします。</p><button class="btn primary block" id="rsBackup">先にバックアップする</button></div>' : '') +
+    '<div class="field"><label for="rsWord">消してよければ、下の欄に「' + RESET_WORD + '」と入力してください</label><input type="text" class="inp" id="rsWord" autocomplete="off" autocapitalize="off" enterkeyhint="done" placeholder="' + RESET_WORD + '"></div></div>';
+  openSheet('初期状態に戻す', body, '<button class="btn danger-solid block" id="rsDo" disabled>すべて消して初期状態に戻す</button><button class="btn ghost block" data-close>やめる</button>');
+  var inp = $('#rsWord'), btn = $('#rsDo');
+  function check() { btn.disabled = inp.value.trim() !== RESET_WORD; }
+  inp.addEventListener('input', check); inp.addEventListener('compositionend', check); inp.addEventListener('change', check);
+  if ($('#rsBackup')) $('#rsBackup').addEventListener('click', function () { openBackup(false); });
+  btn.addEventListener('click', function () { if (inp.value.trim() === RESET_WORD) runReset(); });
+}
+async function runReset() {
+  sheet.dataset.lock = '1';
+  setSheetBody('<p>消しています…</p>', '');
+  try {
+    if (db) { db.close(); db = null; }
+    await new Promise(function (res, rej) {
+      var r = indexedDB.deleteDatabase(DB_NAME);
+      r.onsuccess = function () { res(); };
+      r.onerror = function () { rej(r.error || new Error('消せませんでした')); };
+      r.onblocked = function () { setTimeout(res, 1500); };
+    });
+  } catch (e) {
+    delete sheet.dataset.lock;
+    setSheetBody('<p class="warn-text">うまく消せませんでした</p><p class="hint">' + esc(errMsg(e)) + '</p>', '<button class="btn block" id="rsReload">開き直す</button>');
+    $('#rsReload').addEventListener('click', function () { location.reload(); });
+    return;
+  }
+  setSheetBody('<div class="remind"><p class="remind-lead ok-text">初期状態に戻しました</p><p>下のボタンを押すと、はじめから使えます。</p></div>', '<button class="btn primary block" id="rsReload">はじめから使う</button>');
+  $('#rsReload').addEventListener('click', function () { location.reload(); });
+}
+
+/* ===== ボタンの動き（まとめて受け付ける） ===== */
+document.addEventListener('click', function (e) {
+  var a = e.target.closest('[data-act]'); if (!a) return;
+  var act = a.dataset.act;
+  if (act === 'pick') { ck.itemId = a.dataset.id; ck.q = ''; render(); $('#view').scrollTop = 0; }
+  else if (act === 'new-item') {
+    openItemForm(null, ck.q.trim(), function (it) { closeSheet(true); ck.itemId = it.id; ck.q = ''; tab = 'check'; render(); setTimeout(function () { var p = $('#ckPrice'); if (p) p.focus(); }, 280); });
+  }
+  else if (act === 'new-item-list') { openItemForm(null, listQ.trim(), function () { closeSheet(true); render(); }); }
+  else if (act === 'ck-change') { ck.itemId = ''; ck.size = ''; ck.count = 1; render(); setTimeout(function () { var q = $('#ckQ'); if (q) q.focus(); }, 50); }
+  else if (act === 'ck-detail') openItemDetail(ck.itemId);
+  else if (act === 'cnt-' || act === 'cnt+') {
+    ck.count = Math.min(99, Math.max(1, ck.count + (act === 'cnt+' ? 1 : -1)));
+    $('#ckCount').textContent = '×' + ck.count; updateResult();
+  }
+  else if (act === 'ck-shop') {
+    ck.shop = ck.shop === a.dataset.shop ? '' : a.dataset.shop;
+    $('#ckShop').value = ck.shop; syncChips('ck-shop', ck.shop);
+  }
+  else if (act === 'save') saveCheck(a.dataset.kind);
+  else if (act === 'open-item') openItemDetail(a.dataset.id);
+  else if (act === 'check-item') {
+    var cid = sheet.dataset.item; closeSheet(true);
+    if (ck.itemId !== cid) { ck.itemId = cid; ck.price = ''; ck.size = ''; ck.count = 1; ck.discType = 'none'; ck.discVal = ''; }
+    goTab('check');
+  }
+  else if (act === 'edit-item') {
+    var it = itemById(sheet.dataset.item);
+    openItemForm(it, '', function (rec) { render(); openItemDetail(rec.id); }, function () { openItemDetail(it.id); });
+  }
+  else if (act === 'del-item') {
+    var di = itemById(sheet.dataset.item); if (!di) return;
+    var dn = pricesOf(di.id).length;
+    if (!confirm('「' + di.name + '」を削除しますか？\n' + (dn ? 'この商品の記録' + dn + '件も一緒に消えます。' : '') + '元に戻せません。')) return;
+    delItem(di.id).then(function () { if (ck.itemId === di.id) ck.itemId = ''; closeSheet(true); toast('削除しました'); render(); }).catch(function (er) { alert(errMsg(er)); });
+  }
+  else if (act === 'edit-rec' || act === 'add-rec') {
+    var item = itemById(sheet.dataset.item); if (!item) return;
+    var rec = act === 'edit-rec' ? prices.filter(function (p) { return p.id === a.dataset.id; })[0] : null;
+    openRecordForm(item, rec, function () { openItemDetail(item.id); });
+  }
+  else if (act === 'remind') openBackup(true);
+  else if (act === 'backup') openBackup(false);
+  else if (act === 'restore') $('#restoreFile').click();
+  else if (act === 'reset') openReset();
+  else if (act === 'persist') { askPersist().then(function (ok) { toast(ok ? 'データの保護を有効にしました' : 'iPhoneが受け付けませんでした\n（普段の使用には影響ありません）'); render(); }); }
+  else if (act === 'fav-add') addFav($('#favIn').value);
+  else if (act === 'fav-add-name') addFav(a.dataset.name);
+  else if (act === 'fav-del') {
+    var fd = favShops().slice(), i = Number(a.dataset.i);
+    if (!confirm('「' + fd[i] + '」を、よく行くお店から外しますか？\nこれまでの記録はそのまま残ります。')) return;
+    fd.splice(i, 1); saveFav(fd, '外しました');
+  }
+  else if (act === 'fav-up') {
+    var fu = favShops().slice(), ui = Number(a.dataset.i);
+    if (ui > 0) { var t0 = fu[ui - 1]; fu[ui - 1] = fu[ui]; fu[ui] = t0; saveFav(fu); }
+  }
+});
+document.addEventListener('keydown', function (e) {
+  if (e.target.id === 'favIn' && e.key === 'Enter' && !e.isComposing) { e.preventDefault(); addFav(e.target.value); }
+});
+document.addEventListener('change', function (e) {
+  if (e.target.id === 'remindToggle') {
+    var on = e.target.checked;
+    saveSetting('backupRemind', on).then(function () { toast(on ? 'お知らせをオンにしました' : 'お知らせをオフにしました'); }).catch(function (er) { alert(errMsg(er)); });
+  }
+});
+document.addEventListener('visibilitychange', function () { if (document.visibilityState === 'visible') maybeShowReminder(); });
+$('#restoreFile').addEventListener('change', function (e) { var f = e.target.files && e.target.files[0]; e.target.value = ''; if (f) onRestoreFile(f); });
+
+/* ===== 起動 ===== */
+(async function init() {
+  try {
+    if (!window.indexedDB) throw new Error('このブラウザでは保存機能が使えません');
+    db = await openDB();
+    await loadSettings();
+    await reloadAll();
+    render();
+    maybeShowReminder();
+  } catch (e) {
+    $('#view').innerHTML = '<div class="empty"><b>起動できませんでした</b>' + esc(errMsg(e)) + '</div>';
+  }
+})();
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', function () { navigator.serviceWorker.register('./sw.js').catch(function () {}); });
+}
+</script>
+</body>
+</html>
