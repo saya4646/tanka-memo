@@ -296,7 +296,7 @@ body.sheet-open .toast{bottom:calc(env(safe-area-inset-bottom) + 90px)}
 
 <script>
 'use strict';
-var APP_VERSION = '1.2.1';
+var APP_VERSION = '1.2.2';
 var DB_NAME = 'tanka-memo';          // ほかのアプリと混ざらない専用の保存場所
 var BACKUP_APP_ID = 'tanka-memo';
 var REMIND_COUNT = 30;               // バックアップしていない記録がこの件数たまったらお知らせ
@@ -933,7 +933,7 @@ function renderCheck(v) {
   var lp = latestPhotoRec(item.id);
   html += '<section class="card"><div class="chosen">' + (lp ? '<span class="thumb-btn" data-act="view-photo" data-id="' + esc(lp.id) + '" role="button" aria-label="前回の写真を大きく見る">' + thumbImg(lp.id) + '</span>' : '') +
     '<div class="nm"><b>' + esc(item.name) + '</b><small>' + perLabel(item) + 'で比べます・消費税' + item.tax + '％</small></div>' +
-    '<button class="mini" data-act="ck-detail">履歴</button><button class="mini" data-act="ck-change">変更</button></div></section>' +
+    '<button class="mini" data-act="ck-detail">履歴</button><button class="mini" data-act="ck-change">選び直す</button></div></section>' +
     '<section class="card">' +
     '<div class="field"><label for="ckPrice">値札の値段</label><div class="price-row"><div class="unit-in"><input type="text" inputmode="decimal" class="inp num" id="ckPrice" value="' + esc(ck.price) + '" placeholder="0" autocomplete="off"><span>円</span></div>' +
     '<div class="seg" id="ckTax"><button data-v="in"' + (ck.taxMode === 'in' ? ' class="on"' : '') + '>税込</button><button data-v="ex"' + (ck.taxMode === 'ex' ? ' class="on"' : '') + '>税抜</button></div></div></div>' +
