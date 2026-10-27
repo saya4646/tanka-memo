@@ -255,7 +255,7 @@ body.sheet-open .toast{bottom:calc(env(safe-area-inset-bottom) + 90px)}
 
 <script>
 'use strict';
-var APP_VERSION = '1.1.0';
+var APP_VERSION = '1.1.1';
 var DB_NAME = 'tanka-memo';          // ほかのアプリと混ざらない専用の保存場所
 var BACKUP_APP_ID = 'tanka-memo';
 var REMIND_COUNT = 30;               // バックアップしていない記録がこの件数たまったらお知らせ
@@ -275,7 +275,7 @@ var UNITS = [
 ];
 
 // 最初から登録しておく「よく行くお店」（この順で並ぶ）
-var DEFAULT_SHOPS = ['ツルハ', 'ウエルシア', 'アオキ', 'カワチ', 'ヤマザワ', 'セイムス'];
+var DEFAULT_SHOPS = ['ツルハ', 'ウエルシア', 'サンドラッグ', 'アオキ', 'カワチ', 'ヤマザワ', 'セイムス'];
 
 // ドラッグストアの日用品の商品名候補（2026年10月にメーカー公式サイト・販売店サイトで名前と容量の単位を確認）
 // n：商品名（ブランド＋シリーズ）、u：パッケージの容量の単位、k：検索で引っかけたい別の言い方
@@ -481,7 +481,18 @@ async function applyDefaultShops() {
   var cur = Array.isArray(settings.favShops) ? settings.favShops : [];
   var list = DEFAULT_SHOPS.slice();
   cur.forEach(function (s) { if (s && list.indexOf(s) < 0) list.push(s); });
-  try { await saveSetting('favShops', list); await saveSetting('defaultShopsV1', true); } catch (e) {}
+  try { await saveSetting('favShops', list); await saveSetting('defaultShopsV1', true); await saveSetting('addSundrugV1', true); } catch (e) {}
+}
+// すでに使っている人向け：「サンドラッグ」をウエルシアのすぐ後ろに追加（1回だけ）
+async function addSundrug() {
+  if (settings.addSundrugV1) return;
+  var list = Array.isArray(settings.favShops) ? settings.favShops.slice() : [];
+  if (list.indexOf('サンドラッグ') < 0) {
+    var at = list.indexOf('ウエルシア');
+    if (at < 0) at = list.indexOf('ツルハ');
+    list.splice(at + 1, 0, 'サンドラッグ');   // どちらも無いときは先頭に入る
+  }
+  try { await saveSetting('favShops', list); await saveSetting('addSundrugV1', true); } catch (e) {}
 }
 async function askPersist() {
   try { if (navigator.storage && navigator.storage.persist) return await navigator.storage.persist(); } catch (e) {}
@@ -1323,6 +1334,7 @@ $('#restoreFile').addEventListener('change', function (e) { var f = e.target.fil
     db = await openDB();
     await loadSettings();
     await applyDefaultShops();
+    await addSundrug();
     await reloadAll();
     render();
     maybeShowReminder();
