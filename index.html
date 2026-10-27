@@ -153,7 +153,7 @@ main{flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;oversc
 /* 商品一覧 */
 .item{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;padding:12px;border-radius:14px;background:var(--surface);margin-bottom:6px;text-align:left;width:100%;box-shadow:var(--shadow)}
 .item .nm{font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.item .mt{font-size:12px;color:var(--sub)}
+.item .mt{font-size:12px;color:var(--sub);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .item .rt{text-align:right;font-size:14px;font-weight:800;white-space:nowrap}
 .item .rt small{display:block;font-weight:500;color:var(--sub);font-size:11px}
 .head-row{display:flex;gap:8px;align-items:center;margin:4px 0 10px}
@@ -174,6 +174,47 @@ main{flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;oversc
 .rec .r{text-align:right;font-weight:800}
 .rec .r small{display:block;font-weight:500;color:var(--sub);font-size:12px}
 .rec .memo{color:var(--sub);font-size:12px}
+.rec.wt{grid-template-columns:48px 1fr auto;align-items:center}
+.item.wt{grid-template-columns:44px 1fr auto}
+
+/* 写真 */
+.thumb{width:44px;height:44px;border-radius:10px;background:var(--surface2);object-fit:contain;display:block;flex:none}
+.rec .thumb{width:48px;height:48px}
+.thumb-btn{display:block;flex:none;line-height:0;cursor:pointer}
+.chosen .thumb{width:52px;height:52px}
+.ph-add{position:relative;display:flex;align-items:center;justify-content:center;gap:8px;width:100%;min-height:46px;padding:10px 12px;border-radius:12px;border:1.5px dashed var(--line);background:var(--surface);color:var(--pri);font-weight:700;cursor:pointer}
+.ph-add svg{width:22px;height:22px;flex:none}
+.ph-file{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
+.ph-field{display:flex;align-items:center;gap:14px}
+.ph-prev{flex:none;width:84px;height:84px;border-radius:12px;background:var(--surface2);overflow:hidden;line-height:0}
+.ph-prev img{width:100%;height:100%;object-fit:contain;display:block}
+.ph-acts{display:flex;flex-direction:column;align-items:flex-start;gap:8px;font-size:14px}
+.ph-acts .link{position:relative;cursor:pointer}
+.ph-acts .link.del{color:var(--bad)}
+.ph-busy{font-size:13px;color:var(--sub);padding:12px 0}
+.viewer{position:fixed;inset:0;z-index:90;background:rgba(8,8,16,.94);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:calc(env(safe-area-inset-top) + 12px) 12px calc(env(safe-area-inset-bottom) + 12px)}
+.v-cap{color:#e6e6ee;font-size:13px;text-align:center;flex:none}
+.v-img{flex:1;min-height:0;width:100%;display:flex;align-items:center;justify-content:center;color:#ccc}
+.v-img img{max-width:100%;max-height:100%;object-fit:contain;display:block;border-radius:6px}
+.viewer .btn{flex:none;min-width:140px}
+
+/* 写真を切り取る画面 */
+.trimmer{position:fixed;inset:0;z-index:95;background:rgba(15,15,35,.6);display:flex;align-items:center;justify-content:center;padding:calc(env(safe-area-inset-top) + 12px) 12px calc(env(safe-area-inset-bottom) + 12px)}
+.trim-panel{width:100%;max-width:440px;max-height:100%;overflow-y:auto;background:var(--bg);border-radius:20px;padding:16px}
+.trim-title{font-weight:800;text-align:center;font-size:16px}
+.trim-hint{margin:4px 0 12px;font-size:13px;color:var(--sub);text-align:center}
+.trim-stage{position:relative;width:100%;height:min(56vh,440px);border-radius:14px;overflow:hidden;background:#1b1b26;touch-action:none;-webkit-user-select:none;user-select:none}
+.trim-stage img{position:absolute;max-width:none;max-height:none;pointer-events:none;-webkit-user-drag:none}
+.trim-box{position:absolute;border:2px solid #fff;box-shadow:0 0 0 9999px rgba(0,0,0,.55);cursor:move;background-image:linear-gradient(to right,transparent calc(33.33% - .5px),rgba(255,255,255,.45) calc(33.33% - .5px),rgba(255,255,255,.45) calc(33.33% + .5px),transparent calc(33.33% + .5px),transparent calc(66.67% - .5px),rgba(255,255,255,.45) calc(66.67% - .5px),rgba(255,255,255,.45) calc(66.67% + .5px),transparent calc(66.67% + .5px)),linear-gradient(to bottom,transparent calc(33.33% - .5px),rgba(255,255,255,.45) calc(33.33% - .5px),rgba(255,255,255,.45) calc(33.33% + .5px),transparent calc(33.33% + .5px),transparent calc(66.67% - .5px),rgba(255,255,255,.45) calc(66.67% - .5px),rgba(255,255,255,.45) calc(66.67% + .5px),transparent calc(66.67% + .5px))}
+.trim-h{position:absolute;width:44px;height:44px;margin:-22px 0 0 -22px}
+.trim-h::after{content:"";position:absolute;left:50%;top:50%;width:20px;height:20px;margin:-10px 0 0 -10px;border-radius:50%;background:#fff;border:3px solid var(--pri);box-sizing:border-box;box-shadow:0 1px 4px rgba(0,0,0,.35)}
+.trim-h.e::after,.trim-h.w::after{width:10px;height:26px;margin:-13px 0 0 -5px;border-radius:5px}
+.trim-h.n::after,.trim-h.s::after{width:26px;height:10px;margin:-5px 0 0 -13px;border-radius:5px}
+.trim-h.nw{left:0;top:0}.trim-h.ne{left:100%;top:0}.trim-h.sw{left:0;top:100%}.trim-h.se{left:100%;top:100%}
+.trim-h.n{left:50%;top:0}.trim-h.s{left:50%;top:100%}.trim-h.w{left:0;top:50%}.trim-h.e{left:100%;top:50%}
+.trim-quick{margin-top:10px}
+.trim-quick .btn{width:100%;font-size:13px;padding:9px 6px}
+.trim-foot{display:grid;grid-template-columns:1fr 1.4fr;gap:8px;margin-top:12px}
 
 /* シート */
 .sheet{position:fixed;inset:0;z-index:50;background:rgba(15,15,35,.4);opacity:0;transition:opacity .2s}
@@ -251,11 +292,11 @@ body.sheet-open .toast{bottom:calc(env(safe-area-inset-bottom) + 90px)}
 
 <div id="sheet" class="sheet hidden"></div>
 <div id="toast" class="toast"></div>
-<input type="file" id="restoreFile" accept=".json,application/json,text/plain" class="hidden">
+<input type="file" id="restoreFile" accept=".zip,.json,application/zip,application/json,text/plain" class="hidden">
 
 <script>
 'use strict';
-var APP_VERSION = '1.1.1';
+var APP_VERSION = '1.2.0';
 var DB_NAME = 'tanka-memo';          // ほかのアプリと混ざらない専用の保存場所
 var BACKUP_APP_ID = 'tanka-memo';
 var REMIND_COUNT = 30;               // バックアップしていない記録がこの件数たまったらお知らせ
@@ -421,13 +462,17 @@ function errMsg(e) {
 var db = null;
 function openDB() {
   return new Promise(function (res, rej) {
-    var r = indexedDB.open(DB_NAME, 1);
+    // 2：写真の置き場所（photos：写真、thumbs：一覧用の小さい写真。どちらも記録のidで引く）を追加
+    var r = indexedDB.open(DB_NAME, 2);
     r.onupgradeneeded = function () {
       var d = r.result;
       if (!d.objectStoreNames.contains('items')) d.createObjectStore('items', { keyPath: 'id' });
       if (!d.objectStoreNames.contains('prices')) d.createObjectStore('prices', { keyPath: 'id' });
       if (!d.objectStoreNames.contains('settings')) d.createObjectStore('settings', { keyPath: 'key' });
+      if (!d.objectStoreNames.contains('photos')) d.createObjectStore('photos', { keyPath: 'id' });
+      if (!d.objectStoreNames.contains('thumbs')) d.createObjectStore('thumbs', { keyPath: 'id' });
     };
+    r.onblocked = function () { rej(new Error('ほかの画面で単価メモが開いています。アプリを一度閉じてから開き直してください')); };
     r.onsuccess = function () { res(r.result); };
     r.onerror = function () { rej(r.error); };
   });
@@ -435,6 +480,7 @@ function openDB() {
 function reqP(r) { return new Promise(function (res, rej) { r.onsuccess = function () { res(r.result); }; r.onerror = function () { rej(r.error); }; }); }
 function doneP(t) { return new Promise(function (res, rej) { t.oncomplete = function () { res(); }; t.onerror = function () { rej(t.error); }; t.onabort = function () { rej(t.error || new Error('保存が中断されました')); }; }); }
 function dbAll(store) { return reqP(db.transaction(store).objectStore(store).getAll()); }
+function dbGet(store, key) { return reqP(db.transaction(store).objectStore(store).get(key)); }
 function dbWrite(stores, fn) { var t = db.transaction(stores, 'readwrite'); fn(t); return doneP(t); }
 
 var items = [], prices = [];
@@ -452,24 +498,36 @@ function putItem(it) {
     if (i >= 0) items[i] = it; else items.push(it);
   });
 }
-function putPrice(p) {
-  return dbWrite(['prices'], function (t) { t.objectStore('prices').put(p); }).then(function () {
-    var i = prices.findIndex(function (x) { return x.id === p.id; });
-    if (i >= 0) prices[i] = p; else prices.push(p);
+// ph：新しい写真 { full, thumb }／'remove'（写真を外す）／なし（写真はそのまま）
+async function putPrice(p, ph) {
+  var pbuf = null, tbuf = null;
+  if (ph && ph !== 'remove') {
+    pbuf = await blobToBuf(ph.full); tbuf = await blobToBuf(ph.thumb);
+    p.hasPhoto = true; p.photoBytes = pbuf.byteLength; p.thumbBytes = tbuf.byteLength;
+  } else if (ph === 'remove') { p.hasPhoto = false; p.photoBytes = 0; p.thumbBytes = 0; }
+  await dbWrite(['prices', 'photos', 'thumbs'], function (t) {
+    t.objectStore('prices').put(p);
+    if (pbuf) { t.objectStore('photos').put({ id: p.id, type: 'image/jpeg', buf: pbuf }); t.objectStore('thumbs').put({ id: p.id, type: 'image/jpeg', buf: tbuf }); }
+    else if (ph === 'remove') { t.objectStore('photos').delete(p.id); t.objectStore('thumbs').delete(p.id); }
   });
+  if (ph) dropThumb(p.id);
+  var i = prices.findIndex(function (x) { return x.id === p.id; });
+  if (i >= 0) prices[i] = p; else prices.push(p);
 }
 function delPrice(id) {
-  return dbWrite(['prices'], function (t) { t.objectStore('prices').delete(id); }).then(function () {
+  return dbWrite(['prices', 'photos', 'thumbs'], function (t) { ['prices', 'photos', 'thumbs'].forEach(function (s) { t.objectStore(s).delete(id); }); }).then(function () {
+    dropThumb(id);
     prices = prices.filter(function (x) { return x.id !== id; });
     return saveSetting('lastDeleteAt', Date.now());
   });
 }
 function delItem(id) {
   var ps = pricesOf(id);
-  return dbWrite(['items', 'prices'], function (t) {
+  return dbWrite(['items', 'prices', 'photos', 'thumbs'], function (t) {
     t.objectStore('items').delete(id);
-    ps.forEach(function (p) { t.objectStore('prices').delete(p.id); });
+    ps.forEach(function (p) { ['prices', 'photos', 'thumbs'].forEach(function (s) { t.objectStore(s).delete(p.id); }); });
   }).then(function () {
+    ps.forEach(function (p) { dropThumb(p.id); });
     items = items.filter(function (x) { return x.id !== id; });
     prices = prices.filter(function (x) { return x.itemId !== id; });
     return saveSetting('lastDeleteAt', Date.now());
@@ -497,6 +555,217 @@ async function addSundrug() {
 async function askPersist() {
   try { if (navigator.storage && navigator.storage.persist) return await navigator.storage.persist(); } catch (e) {}
   return false;
+}
+
+/* ===== 写真 ===== */
+var FULL_EDGE = 1200, FULL_Q = 0.78;   // 保存する写真（長い辺1200pxまで）
+var THUMB_EDGE = 240, THUMB_Q = 0.72;  // 一覧用の小さい写真
+var BLANK_IMG = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
+var ICON_CAM = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1z"/><circle cx="12" cy="13.5" r="3.5"/></svg>';
+function blobToBuf(blob) {
+  if (blob.arrayBuffer) return blob.arrayBuffer();
+  return new Promise(function (res, rej) { var fr = new FileReader(); fr.onload = function () { res(fr.result); }; fr.onerror = function () { rej(fr.error); }; fr.readAsArrayBuffer(blob); });
+}
+function loadImage(blob) {
+  return new Promise(function (res, rej) {
+    var url = URL.createObjectURL(blob), img = new Image();
+    img.onload = function () { res({ img: img, url: url }); };
+    img.onerror = function () { URL.revokeObjectURL(url); rej(new Error('写真を読み込めませんでした')); };
+    img.src = url;
+  });
+}
+function canvasToBlob(c, q) {
+  return new Promise(function (res, rej) { c.toBlob(function (b) { b ? res(b) : rej(new Error('写真の変換に失敗しました')); }, 'image/jpeg', q); });
+}
+function releaseCanvas(c) { c.width = 0; c.height = 0; }
+// 一覧用の小さい写真（写真全体をそのまま縮める）
+async function thumbFrom(src) {
+  var isImg = src && src.tagName, r = isImg ? null : await loadImage(src);
+  try {
+    var el = isImg ? src : r.img, w = el.naturalWidth || el.width, h = el.naturalHeight || el.height;
+    var k = Math.min(1, THUMB_EDGE / Math.max(w, h)), c = document.createElement('canvas');
+    c.width = Math.max(1, Math.round(w * k)); c.height = Math.max(1, Math.round(h * k));
+    c.getContext('2d').drawImage(el, 0, 0, c.width, c.height);
+    var out = await canvasToBlob(c, THUMB_Q); releaseCanvas(c); return out;
+  } finally { if (r) URL.revokeObjectURL(r.url); }
+}
+function photoBlob(id) {
+  return dbGet('photos', id).then(function (p) { return p ? new Blob([p.buf], { type: p.type || 'image/jpeg' }) : null; });
+}
+
+/* 写真を切り取る画面
+   四隅・四辺の丸を動かして残したい部分を囲む。枠の中を動かすと位置が変わる。
+   決めたら切り取った写真（full）と一覧用の小さい写真（thumb）を返す。キャンセルなら null。元の写真は残さない */
+function openTrimmer(src) {
+  return loadImage(src).then(function (r) {
+    return new Promise(function (resolve, reject) {
+      var img = r.img, iw = img.naturalWidth, ih = img.naturalHeight;
+      var R = { x: 0, y: 0, w: 1, h: 1 };   // 残す範囲（写真の幅・高さを1とした割合）
+      var ov = document.createElement('div'); ov.className = 'trimmer';
+      ov.innerHTML = '<div class="trim-panel" role="dialog" aria-modal="true" aria-label="写真を切り取る">' +
+        '<div class="trim-title">写真を切り取る</div>' +
+        '<p class="trim-hint">丸を指で動かして、残したい部分を囲んでください。枠の中を動かすと位置が変わります。</p>' +
+        '<div class="trim-stage"><img alt="" draggable="false"><div class="trim-box">' +
+        ['nw', 'n', 'ne', 'e', 'se', 's', 'sw', 'w'].map(function (h) { return '<div class="trim-h ' + h + '" data-h="' + h + '"></div>'; }).join('') +
+        '</div></div>' +
+        '<div class="trim-quick"><button type="button" class="btn ghost" data-tr="reset">切り取りをやめて写真全体に戻す</button></div>' +
+        '<div class="trim-foot"><button type="button" class="btn" data-tr="cancel">キャンセル</button><button type="button" class="btn primary" data-tr="ok">この範囲で決定</button></div></div>';
+      document.body.appendChild(ov);
+      var stage = ov.querySelector('.trim-stage'), pic = ov.querySelector('.trim-stage img'), box = ov.querySelector('.trim-box');
+      pic.src = r.url;
+      var dw = 1, dh = 1, ox = 0, oy = 0;
+      function layout() {
+        var W = stage.clientWidth || 1, H = stage.clientHeight || 1, k = Math.min(W / iw, H / ih);
+        dw = iw * k; dh = ih * k; ox = (W - dw) / 2; oy = (H - dh) / 2;
+        pic.style.left = ox + 'px'; pic.style.top = oy + 'px'; pic.style.width = dw + 'px'; pic.style.height = dh + 'px';
+        drawBox();
+      }
+      function drawBox() {
+        box.style.left = (ox + R.x * dw) + 'px'; box.style.top = (oy + R.y * dh) + 'px';
+        box.style.width = (R.w * dw) + 'px'; box.style.height = (R.h * dh) + 'px';
+      }
+      layout();
+      function clamp(v, lo, hi) { return Math.min(hi, Math.max(lo, v)); }
+      var drag = null;   // 1本の指だけを扱う
+      stage.addEventListener('pointerdown', function (e) {
+        if (drag) return;
+        var hEl = e.target.closest('[data-h]'), mode = hEl ? hEl.dataset.h : (e.target.closest('.trim-box') ? 'move' : null);
+        if (!mode) return;
+        e.preventDefault();
+        try { stage.setPointerCapture(e.pointerId); } catch (_) {}
+        drag = { id: e.pointerId, mode: mode, sx: e.clientX, sy: e.clientY, st: { x: R.x, y: R.y, w: R.w, h: R.h } };
+      });
+      stage.addEventListener('pointermove', function (e) {
+        if (!drag || e.pointerId !== drag.id) return;
+        e.preventDefault();
+        var dx = (e.clientX - drag.sx) / dw, dy = (e.clientY - drag.sy) / dh, st = drag.st, md = drag.mode;
+        var minW = Math.min(1, Math.max(0.05, 48 / dw)), minH = Math.min(1, Math.max(0.05, 48 / dh));
+        if (md === 'move') {
+          R.x = clamp(st.x + dx, 0, 1 - st.w); R.y = clamp(st.y + dy, 0, 1 - st.h);
+        } else {
+          var x1 = st.x, y1 = st.y, x2 = st.x + st.w, y2 = st.y + st.h;
+          if (md.indexOf('w') >= 0) x1 = clamp(x1 + dx, 0, x2 - minW);
+          if (md.indexOf('e') >= 0) x2 = clamp(x2 + dx, x1 + minW, 1);
+          if (md.indexOf('n') >= 0) y1 = clamp(y1 + dy, 0, y2 - minH);
+          if (md.indexOf('s') >= 0) y2 = clamp(y2 + dy, y1 + minH, 1);
+          R = { x: x1, y: y1, w: x2 - x1, h: y2 - y1 };
+        }
+        drawBox();
+      });
+      function endDrag(e) { if (drag && e.pointerId === drag.id) drag = null; }
+      stage.addEventListener('pointerup', endDrag);
+      stage.addEventListener('pointercancel', endDrag);
+      ov.addEventListener('gesturestart', function (e) { e.preventDefault(); });   // iPhoneで画面全体が拡大されるのを防ぐ
+      window.addEventListener('resize', layout);
+      var done = false;
+      function close() { window.removeEventListener('resize', layout); ov.remove(); URL.revokeObjectURL(r.url); }
+      async function make() {
+        var sx = R.x * iw, sy = R.y * ih, sw = Math.max(1, R.w * iw), sh = Math.max(1, R.h * ih);
+        var k = Math.min(1, FULL_EDGE / Math.max(sw, sh)), cw = Math.max(1, Math.round(sw * k)), ch = Math.max(1, Math.round(sh * k));
+        var c = document.createElement('canvas'); c.width = cw; c.height = ch;
+        c.getContext('2d').drawImage(img, sx, sy, sw, sh, 0, 0, cw, ch);
+        var full = await canvasToBlob(c, FULL_Q);
+        var thumb = await thumbFrom(c);
+        releaseCanvas(c);
+        return { full: full, thumb: thumb };
+      }
+      ov.addEventListener('click', function (e) {
+        var b = e.target.closest('[data-tr]'); if (!b || done) return;
+        var act = b.dataset.tr;
+        if (act === 'reset') { R = { x: 0, y: 0, w: 1, h: 1 }; drawBox(); }
+        else if (act === 'cancel') { done = true; close(); resolve(null); }
+        else if (act === 'ok') {
+          done = true; b.disabled = true; b.textContent = '写真を整えています…';
+          make().then(function (res) { close(); resolve(res); }, function (err) { close(); reject(err); });
+        }
+      });
+    });
+  });
+}
+
+/* 小さい写真の読み込み（一度読んだものは覚えておく） */
+var thumbCache = new Map();
+function dropThumb(id) { var u = thumbCache.get(id); if (u) { URL.revokeObjectURL(u); thumbCache.delete(id); } }
+async function getThumbURL(id) {
+  if (thumbCache.has(id)) return thumbCache.get(id);
+  var t = await dbGet('thumbs', id);
+  if (!t) return null;
+  var url = URL.createObjectURL(new Blob([t.buf], { type: t.type || 'image/jpeg' }));
+  thumbCache.set(id, url);
+  return url;
+}
+function fillThumbs(root) {
+  $$('img[data-thumb]', root).forEach(function (img) {
+    getThumbURL(img.dataset.thumb).then(function (u) { if (u) img.src = u; }).catch(function () {});
+  });
+}
+function thumbImg(id) { return '<img class="thumb" src="' + BLANK_IMG + '" data-thumb="' + esc(id) + '" alt="">'; }
+// その商品で、いちばん新しい写真つきの記録
+function latestPhotoRec(itemId) {
+  var ps = pricesOf(itemId).filter(function (p) { return p.hasPhoto; }).sort(sortByNew);
+  return ps[0] || null;
+}
+function photoCaption(p) {
+  return fmtDateShort(p.date) + (p.shop ? '・' + p.shop : '') + '・' + yen(p.price) + '円（税込）';
+}
+
+/* 写真を大きく見る（どこを押しても閉じる） */
+function openViewer(blob, id, cap) {
+  var ov = document.createElement('div'), url = null;
+  ov.className = 'viewer';
+  ov.innerHTML = (cap ? '<div class="v-cap">' + esc(cap) + '</div>' : '') + '<div class="v-img">読み込み中…</div><button type="button" class="btn">閉じる</button>';
+  document.body.appendChild(ov);
+  ov.addEventListener('click', function () { ov.remove(); if (url) URL.revokeObjectURL(url); });
+  (blob ? Promise.resolve(blob) : photoBlob(id)).then(function (b) {
+    if (!b) throw new Error();
+    url = URL.createObjectURL(b);
+    if (ov.isConnected) ov.querySelector('.v-img').innerHTML = '<img src="' + url + '" alt="写真">';
+  }).catch(function () { if (ov.isConnected) ov.querySelector('.v-img').textContent = '写真を読み込めませんでした'; });
+}
+
+/* 写真の欄（チェック画面・記録の画面で共通）
+   st = { id: 保存済みの記録のid, had: 保存済みの写真があるか, nw: 新しく撮った写真, rm: 写真を外すか, busy: 作業中か } */
+function phState(rec) { return { id: rec ? rec.id : '', had: !!(rec && rec.hasPhoto), nw: null, rm: false, busy: false }; }
+function phShowing(st) { return !!st.nw || (st.had && !st.rm); }
+function phChange(st) { return st.nw ? { full: st.nw.full, thumb: st.nw.thumb } : (st.rm && st.had ? 'remove' : null); }
+function phDrop(st) { if (st && st.nw) { URL.revokeObjectURL(st.nw.url); st.nw = null; } }
+function mountPhoto(box, st) {
+  function draw() {
+    if (!box.isConnected) return;
+    if (st.busy) { box.innerHTML = '<div class="ph-busy">写真を整えています…</div>'; return; }
+    box.innerHTML = phShowing(st)
+      ? '<div class="ph-field"><button type="button" class="ph-prev" data-ph="view" aria-label="写真を大きく見る"><img src="' + (st.nw ? st.nw.url : BLANK_IMG) + '"' + (st.nw ? '' : ' data-thumb="' + esc(st.id) + '"') + ' alt=""></button>' +
+        '<div class="ph-acts"><button type="button" class="link" data-ph="trim">切り取る</button><label class="link">撮り直す<input type="file" accept="image/*" class="ph-file"></label><button type="button" class="link del" data-ph="rm">写真を外す</button></div></div>'
+      : '<label class="ph-add">' + ICON_CAM + '写真を追加（値札や商品）<input type="file" accept="image/*" class="ph-file"></label>';
+    if (!st.nw) fillThumbs(box);
+  }
+  async function run(src) {
+    if (st.busy) return;
+    st.busy = true; draw();
+    try {
+      var res = await openTrimmer(src);   // 残す範囲を決めてもらう（キャンセルなら今の写真のまま）
+      if (res) { phDrop(st); st.nw = { full: res.full, thumb: res.thumb, url: URL.createObjectURL(res.full) }; st.rm = false; }
+    } catch (err) { toast(errMsg(err)); }
+    st.busy = false; draw();
+  }
+  box.addEventListener('change', function (e) {
+    if (!e.target.classList.contains('ph-file')) return;
+    var file = e.target.files && e.target.files[0]; e.target.value = '';
+    if (file) run(file);
+  });
+  box.addEventListener('click', async function (e) {
+    var b = e.target.closest('[data-ph]'); if (!b || st.busy) return;
+    var act = b.dataset.ph;
+    if (act === 'view') openViewer(st.nw ? st.nw.full : null, st.id);
+    else if (act === 'rm') { phDrop(st); st.rm = true; draw(); }
+    else if (act === 'trim') {
+      var src = st.nw ? st.nw.full : null;
+      if (!src) { try { src = await photoBlob(st.id); } catch (er) { src = null; } }
+      if (!src) { toast('写真を読み込めませんでした'); return; }
+      run(src);
+    }
+  });
+  draw();
 }
 
 /* ===== 計算と判定 ===== */
@@ -631,7 +900,9 @@ function backupNotice() {
 }
 
 /* ===== チェック画面 ===== */
-var ck = { itemId: '', q: '', price: '', taxMode: null, size: '', count: 1, discType: 'none', discVal: '', shop: null, memo: '' };
+var ck = { itemId: '', q: '', price: '', taxMode: null, size: '', count: 1, discType: 'none', discVal: '', shop: null, memo: '', ph: phState(null) };
+// 商品を変えたときや記録したあとは、撮った写真を引き継がない
+function ckResetPhoto() { phDrop(ck.ph); ck.ph = phState(null); }
 function recentItems() {
   return items.slice().sort(function (a, b) { return (b.lastUsedAt || 0) - (a.lastUsedAt || 0); });
 }
@@ -650,7 +921,7 @@ function renderCheck(v) {
       html += '<section class="card help"><h3>使い方</h3>' +
         '<p>1. お店で気になった商品の名前を上の欄に入れます。よくある日用品は候補に出るので、タップするだけで登録できます。</p>' +
         '<p>2. 値札の値段と、パッケージに書いてある内容量（mLやg）を入れます。「2.4倍」のような倍率の表示は気にしなくて大丈夫です。</p>' +
-        '<p>3. 「買った」か「見ただけ」で記録します。記録がたまるほど、安いか高いかの判定ができるようになります。</p></section>';
+        '<p>3. 「買った」か「見ただけ」で記録します。記録がたまるほど、安いか高いかの判定ができるようになります。値札や商品の写真も一緒に残せます（なくてもOK）。</p></section>';
     }
     v.innerHTML = html;
     var q = $('#ckQ');
@@ -659,7 +930,9 @@ function renderCheck(v) {
     return;
   }
   var u = unitOf(item);
-  html += '<section class="card"><div class="chosen"><div class="nm"><b>' + esc(item.name) + '</b><small>' + perLabel(item) + 'で比べます・消費税' + item.tax + '％</small></div>' +
+  var lp = latestPhotoRec(item.id);
+  html += '<section class="card"><div class="chosen">' + (lp ? '<span class="thumb-btn" data-act="view-photo" data-id="' + esc(lp.id) + '" role="button" aria-label="前回の写真を大きく見る">' + thumbImg(lp.id) + '</span>' : '') +
+    '<div class="nm"><b>' + esc(item.name) + '</b><small>' + perLabel(item) + 'で比べます・消費税' + item.tax + '％</small></div>' +
     '<button class="mini" data-act="ck-detail">履歴</button><button class="mini" data-act="ck-change">変更</button></div></section>' +
     '<section class="card">' +
     '<div class="field"><label for="ckPrice">値札の値段</label><div class="price-row"><div class="unit-in"><input type="text" inputmode="decimal" class="inp num" id="ckPrice" value="' + esc(ck.price) + '" placeholder="0" autocomplete="off"><span>円</span></div>' +
@@ -674,6 +947,7 @@ function renderCheck(v) {
     '<section class="card" id="ckSave"><div class="field"><span class="lbl">お店</span>' + shopChipsHTML(ck.shop, 'ck-shop') +
     '<input type="text" class="inp" id="ckShop" value="' + esc(ck.shop) + '" placeholder="お店の名前（なくてもOK）" autocomplete="off"></div>' +
     '<div class="field"><label for="ckMemo">メモ（香り・種類など）</label><input type="text" class="inp" id="ckMemo" value="' + esc(ck.memo) + '" placeholder="なくてもOK" autocomplete="off"></div>' +
+    '<div class="field"><span class="lbl">写真（値札や商品・なくてもOK）</span><div id="ckPhoto"></div></div>' +
     '<div class="save-btns"><button class="btn primary" data-act="save" data-kind="bought">買った</button><button class="btn ghost" data-act="save" data-kind="seen">見ただけ</button></div>' +
     '<div class="note small sub" style="margin-top:8px">見ただけの値段も記録しておくと、相場が分かりやすくなります。</div></section>';
   v.innerHTML = html;
@@ -690,6 +964,8 @@ function renderCheck(v) {
       updateResult();
     });
   });
+  mountPhoto($('#ckPhoto'), ck.ph);
+  fillThumbs($('.chosen', v));
   updateResult();
 }
 function segOn(sel, btn) { $$(sel + ' button').forEach(function (x) { x.classList.toggle('on', x === btn); }); }
@@ -753,6 +1029,7 @@ async function addPreset(name) {
     toast('「' + p.name + '」を登録しました');
   }
   closeSheet(true);
+  ckResetPhoto();
   ck.itemId = it.id; ck.q = ''; ck.price = ''; ck.size = ''; ck.count = 1; ck.discType = 'none'; ck.discVal = '';
   tab = 'check'; render(); $('#view').scrollTop = 0;
 }
@@ -835,6 +1112,7 @@ function updateResult() {
 }
 async function saveCheck(kind) {
   var c = currentCalc(); if (!c) return;
+  if (ck.ph.busy) return;
   if (!(c.raw > 0)) { toast('値段を入れてください'); $('#ckPrice').focus(); return; }
   if (!(c.size > 0)) { toast('内容量を入れてください'); $('#ckSize').focus(); return; }
   if (!(c.pay > 0)) { toast('割引の数字を確認してください'); return; }
@@ -846,12 +1124,12 @@ async function saveCheck(kind) {
     createdAt: now, updatedAt: now
   };
   try {
-    await putPrice(rec);
+    await putPrice(rec, phChange(ck.ph));
     await putItem(Object.assign({}, c.item, { lastUsedAt: now }));
     if (shop !== settings.lastShop) saveSetting('lastShop', shop).catch(function () {});
   } catch (e) { alert(errMsg(e)); return; }
   if (!settings.persistAsked) { saveSetting('persistAsked', true).catch(function () {}); askPersist(); }
-  ck.price = ''; ck.discType = 'none'; ck.discVal = ''; ck.memo = '';
+  ck.price = ''; ck.discType = 'none'; ck.discVal = ''; ck.memo = ''; ckResetPhoto();
   toast(kind === 'bought' ? '「買った」で記録しました' : '「見ただけ」で記録しました');
   render();
 }
@@ -872,11 +1150,14 @@ function renderItemList() {
   var q = norm(listQ);
   var list = recentItems().filter(function (it) { return !q || matchQ(norm(it.name + ' ' + (it.memo || '')), listQ); });
   if (!list.length) { box.innerHTML = '<div class="empty">見つかりませんでした</div>'; return; }
+  var lps = new Map(), anyPh = false;
+  list.forEach(function (it) { var lp = latestPhotoRec(it.id); if (lp) { lps.set(it.id, lp); anyPh = true; } });
   box.innerHTML = list.map(function (it) {
-    var st = statsOf(it, null), n = pricesOf(it.id).length;
-    return '<button class="item" data-act="open-item" data-id="' + it.id + '"><div style="min-width:0"><div class="nm">' + esc(it.name) + '</div><div class="mt">' + n + '件の記録' + (st.n ? '・前回 ' + fmtDateShort(st.last.date) : '') + '</div></div>' +
+    var st = statsOf(it, null), n = pricesOf(it.id).length, lp = lps.get(it.id);
+    return '<button class="item' + (anyPh ? ' wt' : '') + '" data-act="open-item" data-id="' + it.id + '">' + (anyPh ? (lp ? thumbImg(lp.id) : '<span class="thumb"></span>') : '') + '<div style="min-width:0"><div class="nm">' + esc(it.name) + '</div><div class="mt">' + n + '件の記録' + (st.n ? '・前回 ' + fmtDateShort(st.last.date) : '') + '</div></div>' +
       '<div class="rt num">' + (st.n ? fmtUnit(st.min) + '円<small>最安（' + perLabel(it) + '）</small>' : '<small>判定用の記録なし</small>') + '</div></button>';
   }).join('');
+  fillThumbs(box);
 }
 
 /* ===== 商品の詳細 ===== */
@@ -926,7 +1207,8 @@ function openItemDetail(id) {
     (recs.length >= 2 ? '<section class="card"><h3>単価の移り変わり</h3>' + chartSVG(item, recs, st) + '</section>' : '') +
     '<section class="card"><h3>記録（' + recs.length + '件）</h3>' +
     (recs.length ? recs.map(function (p) {
-      return '<button class="rec" data-act="edit-rec" data-id="' + p.id + '"><div class="l"><b>' + fmtDateShort(p.date) + '</b> <span class="tag ' + (p.kind === 'seen' ? 'seen">見ただけ' : 'bought">買った') + '</span>' +
+      return '<button class="rec' + (p.hasPhoto ? ' wt' : '') + '" data-act="edit-rec" data-id="' + p.id + '">' +
+        (p.hasPhoto ? '<span class="thumb-btn" data-act="view-photo" data-id="' + esc(p.id) + '" role="button" aria-label="写真を大きく見る">' + thumbImg(p.id) + '</span>' : '') + '<div class="l"><b>' + fmtDateShort(p.date) + '</b> <span class="tag ' + (p.kind === 'seen' ? 'seen">見ただけ' : 'bought">買った') + '</span>' +
         '<small>' + esc(p.shop || 'お店の記録なし') + '・' + sizeLabel(p, item) + '</small>' + (p.memo ? '<div class="memo">' + esc(p.memo) + '</div>' : '') + '</div>' +
         '<div class="r num">' + fmtUnit(recUnit(p, item)) + '円<small>' + yen(p.price) + '円（税込）</small></div></button>';
     }).join('') : '<div class="sub small">まだ記録がありません</div>') +
@@ -934,6 +1216,7 @@ function openItemDetail(id) {
     '<section class="card"><button class="btn ghost block" data-act="edit-item">商品名・単位を直す</button><button class="btn danger block" data-act="del-item">この商品を削除</button></section>';
   openSheet(item.name, body, '<button class="btn primary block" data-act="check-item">この商品でチェックする</button>');
   sheet.dataset.item = id;
+  fillThumbs(sheet);
 }
 
 /* ===== 商品の登録・編集 ===== */
@@ -983,9 +1266,13 @@ function openRecordForm(item, rec, back) {
     '<div class="field"><label for="rfSize">内容量（1個あたり）と個数</label><div class="size-row"><div class="unit-in"><input type="text" inputmode="decimal" class="inp num" id="rfSize" value="' + esc(r.size) + '" placeholder="0" autocomplete="off"><span>' + esc(u.label) + '</span></div>' +
     '<div class="stepper"><button id="rfCm" aria-label="個数を減らす">−</button><output id="rfCount">×' + (r.count || 1) + '</output><button id="rfCp" aria-label="個数を増やす">＋</button></div></div></div>' +
     '<div class="field"><label for="rfMemo">メモ（香り・種類など）</label><input type="text" class="inp" id="rfMemo" value="' + esc(r.memo || '') + '" placeholder="なくてもOK" autocomplete="off"></div>' +
+    '<div class="field"><span class="lbl">写真（値札や商品・なくてもOK）</span><div id="rfPhoto"></div></div>' +
     '<div class="note small sub" id="rfUnit" style="margin-top:12px"></div>' +
     (rec ? '<button class="btn danger block" style="margin-top:20px" id="rfDel">この記録を削除</button>' : '');
   openSheet(rec ? '記録を直す' : '記録を追加', body, '<button class="btn primary block" id="rfSave">保存する</button>', back);
+  var ph = phState(rec);
+  mountPhoto($('#rfPhoto'), ph);
+  sheetCleanup = function () { phDrop(ph); };
   r.count = r.count || 1;
   function upd() {
     var uu = unitPriceOf(num($('#rfPrice').value), num($('#rfSize').value), r.count, item);
@@ -1004,6 +1291,7 @@ function openRecordForm(item, rec, back) {
   $('#rfCm').addEventListener('click', function () { r.count = Math.max(1, r.count - 1); $('#rfCount').textContent = '×' + r.count; upd(); });
   $('#rfCp').addEventListener('click', function () { r.count = Math.min(99, r.count + 1); $('#rfCount').textContent = '×' + r.count; upd(); });
   $('#rfSave').addEventListener('click', async function () {
+    if (ph.busy) return;
     var price = num($('#rfPrice').value), size = num($('#rfSize').value), date = $('#rfDate').value;
     if (!date) { toast('日付を入れてください'); return; }
     if (!(price > 0)) { toast('金額を入れてください'); $('#rfPrice').focus(); return; }
@@ -1012,7 +1300,7 @@ function openRecordForm(item, rec, back) {
     var out = Object.assign({}, r, { itemId: item.id, date: date, price: Math.round(price), size: size, shop: $('#rfShop').value.trim(), memo: $('#rfMemo').value.trim(), updatedAt: now });
     if (!rec) { out.id = uid(); out.createdAt = now; }
     else if (rec.price !== out.price && out.raw) delete out.raw;   // 金額を直したら、値札の情報は外す
-    try { await putPrice(out); } catch (e) { alert(errMsg(e)); return; }
+    try { await putPrice(out, phChange(ph)); } catch (e) { alert(errMsg(e)); return; }
     toast('保存しました');
     render();
     openItemDetail(item.id);
@@ -1029,6 +1317,7 @@ function openRecordForm(item, rec, back) {
 /* ===== 設定 ===== */
 function renderSettings(v) {
   var unsaved = unsavedCount();
+  var phs = photoStats();
   var hasDiff = unsaved > 0 || ((settings.lastDeleteAt || 0) > (settings.lastBackupAt || 0) && settings.lastBackupAt > 0);
   v.innerHTML =
     '<section class="card"><h3>判定に使う期間</h3><p class="set-desc">この期間の記録だけで「安い・高い」を判定します。物価が上がっていても、昔の安い値段に引っぱられないようにするためです。</p>' +
@@ -1038,16 +1327,17 @@ function renderSettings(v) {
     '<p class="set-desc">記録はこのiPhoneの中にだけ保存されています。iPhoneを買い替えたときなどに備えて、ときどきバックアップを保存してください。</p>' +
     '<div class="set-row"><span>前回のバックアップ</span><b>' + (settings.lastBackupAt ? fmtDateTime(settings.lastBackupAt) : 'まだありません') + '</b></div>' +
     '<div class="set-row"><span>まだバックアップしていない記録</span><b>' + unsaved + '件</b></div>' +
+    '<div class="set-row"><span>写真</span><b>' + phs.n + '枚' + (phs.n ? '（' + fmtBytes(phs.bytes) + '）' : '') + '</b></div>' +
     '<div class="set-row"><span>データの保護</span><b id="persistState">確認中…</b></div>' +
     '<button class="btn primary block" style="margin-top:10px" data-act="backup"' + (items.length ? '' : ' disabled') + '>' + (hasDiff || !settings.lastBackupAt ? 'バックアップを保存する' : 'もう一度バックアップを保存する') + '</button></section>' +
     '<section class="card"><h3>バックアップのお知らせ</h3><p class="set-desc">まだバックアップしていない記録が' + REMIND_COUNT + '件たまると、アプリを開いたときにお知らせを出します。</p>' +
     '<label class="switch-row"><span>お知らせを出す</span><input type="checkbox" id="remindToggle"' + (settings.backupRemind === false ? '' : ' checked') + '><span class="switch"></span></label></section>' +
-    '<section class="card"><h3>バックアップから戻す</h3><p class="set-desc">保存したバックアップのファイルを選ぶと、記録を取り込みます。いまある記録はそのまま残り、同じ記録は新しく直した方が使われます。</p>' +
+    '<section class="card"><h3>バックアップから戻す</h3><p class="set-desc">保存したバックアップのファイルを選ぶと、記録と写真を取り込みます。いまある記録はそのまま残り、同じ記録は新しく直した方が使われます。以前のバージョンで保存したバックアップも使えます。</p>' +
     '<button class="btn ghost block" data-act="restore">ファイルを選ぶ</button></section>' +
     '<section class="card help"><h3>判定の決まり</h3>' +
     '<p>最安値更新：これまでの最安値より安い</p><p>安め：最安値とほぼ同じ（3％以内）か、平均より3％以上安い</p><p>ふつう：平均とほぼ同じ（平均より5％高いまで）</p><p>高め：平均より5％以上高い</p>' +
     '<p class="sub small">税抜の値札は、商品ごとの税率で税込に直し、1円未満は切り捨てて計算します。お店によって1円ずれることがあります。</p></section>' +
-    '<section class="card danger-zone"><h3>初期状態に戻す</h3><p class="set-desc">商品・記録・設定をすべて消して、ホーム画面に追加したばかりの状態に戻します。消したものは元に戻せません。</p>' +
+    '<section class="card danger-zone"><h3>初期状態に戻す</h3><p class="set-desc">商品・記録・写真・設定をすべて消して、ホーム画面に追加したばかりの状態に戻します。消したものは元に戻せません。</p>' +
     '<button class="btn danger block" data-act="reset">初期状態に戻す</button></section>' +
     '<div class="version">単価メモ ' + APP_VERSION + '</div>';
   $$('#perSeg button').forEach(function (b) {
@@ -1085,15 +1375,93 @@ function addFav(name) {
   fav.push(name); saveFav(fav, '追加しました');
 }
 
+/* ===== ZIPファイル（バックアップの入れ物。写真を一緒に入れるため） ===== */
+var CRC_TABLE = (function () { var t = new Uint32Array(256); for (var n = 0; n < 256; n++) { var c = n; for (var k = 0; k < 8; k++) c = c & 1 ? 0xEDB88320 ^ (c >>> 1) : c >>> 1; t[n] = c >>> 0; } return t; })();
+function crc32(u8) { var c = 0xFFFFFFFF; for (var i = 0; i < u8.length; i++) c = CRC_TABLE[(c ^ u8[i]) & 0xFF] ^ (c >>> 8); return (c ^ 0xFFFFFFFF) >>> 0; }
+function tick() { return new Promise(function (r) { setTimeout(r, 0); }); }
+async function makeZip(entries) {
+  var enc = new TextEncoder(), parts = [], central = [], offset = 0, d = new Date();
+  var dosTime = (d.getHours() << 11) | (d.getMinutes() << 5) | (d.getSeconds() >> 1);
+  var dosDate = ((d.getFullYear() - 1980) << 9) | ((d.getMonth() + 1) << 5) | d.getDate();
+  for (var i = 0; i < entries.length; i++) {
+    var e = entries[i], name = enc.encode(e.name), crc = crc32(e.bytes), size = e.bytes.length;
+    var lh = new DataView(new ArrayBuffer(30));
+    lh.setUint32(0, 0x04034b50, true); lh.setUint16(4, 20, true); lh.setUint16(6, 0x0800, true); lh.setUint16(8, 0, true);
+    lh.setUint16(10, dosTime, true); lh.setUint16(12, dosDate, true); lh.setUint32(14, crc, true);
+    lh.setUint32(18, size, true); lh.setUint32(22, size, true); lh.setUint16(26, name.length, true); lh.setUint16(28, 0, true);
+    parts.push(lh.buffer, name, e.bytes);
+    var ch = new DataView(new ArrayBuffer(46));
+    ch.setUint32(0, 0x02014b50, true); ch.setUint16(4, 20, true); ch.setUint16(6, 20, true); ch.setUint16(8, 0x0800, true); ch.setUint16(10, 0, true);
+    ch.setUint16(12, dosTime, true); ch.setUint16(14, dosDate, true); ch.setUint32(16, crc, true); ch.setUint32(20, size, true); ch.setUint32(24, size, true);
+    ch.setUint16(28, name.length, true); ch.setUint16(30, 0, true); ch.setUint16(32, 0, true); ch.setUint16(34, 0, true); ch.setUint16(36, 0, true);
+    ch.setUint32(38, 0, true); ch.setUint32(42, offset, true);
+    central.push(ch.buffer, name);
+    offset += 30 + name.length + size;
+    if (i % 20 === 19) await tick();
+  }
+  var cdSize = 0; central.forEach(function (p) { cdSize += p.byteLength; });
+  var eo = new DataView(new ArrayBuffer(22));
+  eo.setUint32(0, 0x06054b50, true); eo.setUint16(4, 0, true); eo.setUint16(6, 0, true);
+  eo.setUint16(8, entries.length, true); eo.setUint16(10, entries.length, true);
+  eo.setUint32(12, cdSize, true); eo.setUint32(16, offset, true); eo.setUint16(20, 0, true);
+  return new Blob(parts.concat(central, [eo.buffer]), { type: 'application/zip' });
+}
+async function readZip(file) {
+  var BAD = '単価メモのバックアップファイルとして読み込めませんでした';
+  var tailLen = Math.min(file.size, 65557);
+  if (tailLen < 22) throw new Error(BAD);
+  var tail = new DataView(await blobToBuf(file.slice(file.size - tailLen)));
+  var eo = -1;
+  for (var i = tailLen - 22; i >= 0; i--) { if (tail.getUint32(i, true) === 0x06054b50) { eo = i; break; } }
+  if (eo < 0) throw new Error(BAD);
+  var count = tail.getUint16(eo + 10, true), cdSize = tail.getUint32(eo + 12, true), cdOff = tail.getUint32(eo + 16, true);
+  var cdBuf = await blobToBuf(file.slice(cdOff, cdOff + cdSize)), cd = new DataView(cdBuf), dec = new TextDecoder(), map = new Map(), p = 0;
+  for (var j = 0; j < count; j++) {
+    if (cd.getUint32(p, true) !== 0x02014b50) throw new Error(BAD);
+    var method = cd.getUint16(p + 10, true), csize = cd.getUint32(p + 20, true);
+    var nlen = cd.getUint16(p + 28, true), xlen = cd.getUint16(p + 30, true), clen = cd.getUint16(p + 32, true), off = cd.getUint32(p + 42, true);
+    map.set(dec.decode(new Uint8Array(cdBuf, p + 46, nlen)), { method: method, csize: csize, off: off });
+    p += 46 + nlen + xlen + clen;
+  }
+  return {
+    read: async function (n) {
+      var e = map.get(n); if (!e) return null;
+      if (e.method !== 0) throw new Error('このファイルは別のアプリで作り直されているため読み込めません。保存したときのファイルをそのまま選んでください');
+      var lh = new DataView(await blobToBuf(file.slice(e.off, e.off + 30)));
+      if (lh.getUint32(0, true) !== 0x04034b50) throw new Error(BAD);
+      var start = e.off + 30 + lh.getUint16(26, true) + lh.getUint16(28, true);
+      return blobToBuf(file.slice(start, start + e.csize));
+    }
+  };
+}
+
 /* ===== バックアップ ===== */
 function stampNow() { var d = new Date(); return d.getFullYear() + pad(d.getMonth() + 1) + pad(d.getDate()) + '-' + pad(d.getHours()) + pad(d.getMinutes()); }
-function buildBackup() {
-  var startedAt = Date.now();
-  var data = { app: BACKUP_APP_ID, version: APP_VERSION, createdAt: startedAt, items: items, prices: prices, settings: { favShops: favShops(), period: settings.period } };
-  var blob = new Blob([JSON.stringify(data)], { type: 'application/json' });
-  var name = '単価メモ_バックアップ_' + stampNow() + '.json', file;
-  try { file = new File([blob], name, { type: 'application/json' }); } catch (e) { file = blob; file.name = name; }
-  return { file: file, name: name, startedAt: startedAt, count: items.length, pcount: prices.length };
+function fmtBytes(b) {
+  if (!b) return '0KB';
+  if (b < 1048576) return Math.max(1, Math.round(b / 1024)) + 'KB';
+  if (b < 1073741824) return (b / 1048576).toFixed(1) + 'MB';
+  return (b / 1073741824).toFixed(2) + 'GB';
+}
+function photoStats() {
+  var n = 0, bytes = 0;
+  prices.forEach(function (p) { if (p.hasPhoto) { n++; bytes += (p.photoBytes || 0) + (p.thumbBytes || 0); } });
+  return { n: n, bytes: bytes };
+}
+async function buildBackup() {
+  var startedAt = Date.now(), its = items.slice(), ps = prices.slice();
+  var data = { app: BACKUP_APP_ID, format: 2, version: APP_VERSION, createdAt: startedAt, items: its, prices: ps, settings: { favShops: favShops(), period: settings.period } };
+  var entries = [{ name: 'data.json', bytes: new TextEncoder().encode(JSON.stringify(data)) }], pn = 0;
+  for (var i = 0; i < ps.length; i++) {
+    if (!ps[i].hasPhoto) continue;
+    var ph = await dbGet('photos', ps[i].id), th = await dbGet('thumbs', ps[i].id);
+    if (ph) { entries.push({ name: 'photos/' + ps[i].id + '.jpg', bytes: new Uint8Array(ph.buf) }); pn++; }
+    if (th) entries.push({ name: 'thumbs/' + ps[i].id + '.jpg', bytes: new Uint8Array(th.buf) });
+  }
+  var blob = await makeZip(entries);
+  var name = '単価メモ_バックアップ_' + stampNow() + '.zip', file;
+  try { file = new File([blob], name, { type: 'application/zip' }); } catch (e) { file = blob; file.name = name; }
+  return { file: file, name: name, startedAt: startedAt, count: its.length, pcount: ps.length, photos: pn };
 }
 function finishBackup(res) {
   return Promise.all([saveSetting('remindSnoozeUntil', 0), saveSetting('lastBackupAt', res.startedAt)]).catch(function () {}).then(function () { render(); });
@@ -1109,42 +1477,50 @@ async function shareBackupFile(res, dlLink) {
     return false;
   }
 }
-function openBackup(fromReminder) {
-  var n = unsavedCount(), res = buildBackup(), dlURL = URL.createObjectURL(res.file), done = false, later = false;
+async function openBackup(fromReminder) {
+  var n = unsavedCount(), res = null, dlURL = null, done = false, later = false, alive = true;
   var body = '<div class="remind">' +
     (fromReminder ? '<p class="remind-lead">記録が ' + n + '件 たまりました</p>' : '') +
     '<p>このアプリの記録は、<b>このiPhoneの中にだけ</b>しまってあります。iPhoneを買い替えたり、このアプリを消したりすると、なくなってしまいます。</p>' +
-    '<p>なくさないように、バックアップを1つ、iPhoneの「ファイル」アプリに保存しておきましょう。</p>' +
+    '<p>なくさないように、バックアップを1つ、iPhoneの「ファイル」アプリに保存しておきましょう。写真も一緒に保存されます。</p>' +
     '<div class="steps">' +
     '<div class="step"><span>1</span><div>下の「バックアップを保存する」を押します</div></div>' +
     '<div class="step"><span>2</span><div>出てきた画面で「“ファイル”に保存」を押します</div></div>' +
     '<div class="step"><span>3</span><div>保存する場所を選んで、右上の「保存」を押します</div></div>' +
     '</div>' +
-    '<div class="info"><dt>商品</dt><dd>' + res.count + '件</dd><dt>記録</dt><dd>' + res.pcount + '件</dd><dt>ファイル名</dt><dd>' + esc(res.name) + '</dd></div>' +
+    '<div id="bkInfo"><p class="hint">バックアップを準備しています…</p></div>' +
     '<p class="hint">「このiPhone内」に保存した場合は、iPhoneをなくしたときや買い替えたときに一緒に消えてしまうので、ときどきパソコンなどにも移しておくと安心です。</p>' +
     (fromReminder ? '<p class="hint">このお知らせは、設定の「バックアップのお知らせ」でオフにできます。</p>' : '') +
-    '<a class="link small" id="bkDl" href="' + dlURL + '" download="' + esc(res.name) + '">保存の画面が出ない場合はこちら</a>' +
     '</div>';
   openSheet(fromReminder ? 'バックアップをとりましょう' : 'バックアップ', body,
-    '<button class="btn primary block" id="bkSave">バックアップを保存する</button>' +
+    '<button class="btn primary block" id="bkSave" disabled>準備しています…</button>' +
     (fromReminder ? '<button class="btn ghost block" id="bkLater">あとで（' + SNOOZE_DAYS + '日後にまたお知らせします）</button>' : ''));
   sheetCleanup = function () {
-    URL.revokeObjectURL(dlURL);
+    alive = false;
+    if (dlURL) URL.revokeObjectURL(dlURL);
     if (fromReminder && !done && !later) saveSetting('remindSnoozeUntil', Date.now() + SNOOZE_DAYS * 86400000).catch(function () {});
   };
-  function showDone() {
-    if (done) return; done = true;
-    finishBackup(res);
-    setSheetBody('<div class="remind"><p class="remind-lead ok-text">保存できました</p><p>これで、iPhoneを買い替えたときなどにも、記録を元に戻せます。</p><p class="hint">戻すときは、設定の「バックアップから戻す」から、保存したファイルを選びます。</p></div>',
-      '<button class="btn primary block" data-close>閉じる</button>');
-  }
-  $('#bkSave').addEventListener('click', async function () { if (await shareBackupFile(res, $('#bkDl'))) showDone(); });
-  $('#bkDl').addEventListener('click', function () { setTimeout(showDone, 300); });
   if ($('#bkLater')) $('#bkLater').addEventListener('click', function () {
     later = true;
     saveSetting('remindSnoozeUntil', Date.now() + SNOOZE_DAYS * 86400000).catch(function () {});
     closeSheet(true);
   });
+  try { res = await buildBackup(); }
+  catch (e) { if (alive && $('#bkInfo')) $('#bkInfo').innerHTML = '<p class="warn-text">バックアップを作れませんでした</p><p class="hint">' + esc(errMsg(e)) + '</p>'; return; }
+  if (!alive || !$('#bkInfo')) return;
+  dlURL = URL.createObjectURL(res.file);
+  $('#bkInfo').innerHTML = '<div class="info"><dt>商品</dt><dd>' + res.count + '件</dd><dt>記録</dt><dd>' + res.pcount + '件</dd><dt>写真</dt><dd>' + res.photos + '枚</dd>' +
+    '<dt>大きさ</dt><dd>' + fmtBytes(res.file.size) + '</dd><dt>ファイル名</dt><dd>' + esc(res.name) + '</dd></div>' +
+    '<p style="margin:10px 0 0"><a class="link small" id="bkDl" href="' + dlURL + '" download="' + esc(res.name) + '">保存の画面が出ない場合はこちら</a></p>';
+  var btn = $('#bkSave'); btn.disabled = false; btn.textContent = 'バックアップを保存する';
+  function showDone() {
+    if (done) return; done = true;
+    finishBackup(res);
+    setSheetBody('<div class="remind"><p class="remind-lead ok-text">保存できました</p><p>これで、iPhoneを買い替えたときなどにも、記録と写真を元に戻せます。</p><p class="hint">戻すときは、設定の「バックアップから戻す」から、保存したファイルを選びます。</p></div>',
+      '<button class="btn primary block" data-close>閉じる</button>');
+  }
+  btn.addEventListener('click', async function () { if (await shareBackupFile(res, $('#bkDl'))) showDone(); });
+  $('#bkDl').addEventListener('click', function () { setTimeout(showDone, 300); });
 }
 function maybeShowReminder() {
   if (!db || !backupNotice()) return;
@@ -1153,29 +1529,38 @@ function maybeShowReminder() {
   openBackup(true);
 }
 
-/* ===== バックアップから戻す ===== */
+/* ===== バックアップから戻す（写真入りの .zip と、以前の .json のどちらも読める） ===== */
 function readText(file) {
   return new Promise(function (res, rej) { var fr = new FileReader(); fr.onload = function () { res(fr.result); }; fr.onerror = function () { rej(fr.error); }; fr.readAsText(file); });
 }
 async function onRestoreFile(file) {
-  var data;
+  var NOT = '単価メモのバックアップファイルではありません';
+  openSheet('バックアップから戻す', '<p>ファイルを確認しています…</p>', '');
+  var data, z = null;
   try {
-    data = JSON.parse(await readText(file));
-    if (!data || data.app !== BACKUP_APP_ID || !Array.isArray(data.items) || !Array.isArray(data.prices)) throw new Error('単価メモのバックアップファイルではありません');
+    var head = new Uint8Array(await blobToBuf(file.slice(0, 2)));
+    if (head[0] === 0x50 && head[1] === 0x4b) {
+      z = await readZip(file);
+      var buf = await z.read('data.json');
+      if (!buf) throw new Error(NOT);
+      data = JSON.parse(new TextDecoder().decode(buf));
+    } else data = JSON.parse(await readText(file));
+    if (!data || data.app !== BACKUP_APP_ID || !Array.isArray(data.items) || !Array.isArray(data.prices)) throw new Error(NOT);
   } catch (e) {
-    openSheet('バックアップから戻す', '<p class="warn-text">読み込めませんでした</p><p class="hint">' + esc(e instanceof SyntaxError ? '単価メモのバックアップファイルではありません' : errMsg(e)) + '</p>', '<button class="btn block" data-close>閉じる</button>');
+    setSheetBody('<p class="warn-text">読み込めませんでした</p><p class="hint">' + esc(e instanceof SyntaxError ? NOT : errMsg(e)) + '</p>', '<button class="btn block" data-close>閉じる</button>');
     return;
   }
-  openSheet('バックアップから戻す',
+  var pn = z ? data.prices.filter(function (p) { return p && p.hasPhoto; }).length : 0;
+  setSheetBody(
     '<p><b>このファイルを取り込みます。</b></p>' +
-    '<div class="info"><dt>作った日時</dt><dd>' + fmtDateTime(data.createdAt) + '</dd><dt>商品</dt><dd>' + data.items.length + '件</dd><dt>記録</dt><dd>' + data.prices.length + '件</dd></div>' +
+    '<div class="info"><dt>作った日時</dt><dd>' + fmtDateTime(data.createdAt) + '</dd><dt>商品</dt><dd>' + data.items.length + '件</dd><dt>記録</dt><dd>' + data.prices.length + '件</dd>' + (z ? '<dt>写真</dt><dd>' + pn + '枚</dd>' : '') + '</div>' +
     '<p class="hint">いまある記録は残ります。同じ記録がある場合は、新しく直した方が使われます。</p>',
     '<button class="btn primary block" id="rsGo">取り込む</button>');
   $('#rsGo').addEventListener('click', async function () {
     sheet.dataset.lock = '1';
     setSheetBody('<p>取り込んでいます…</p>', '');
     try {
-      var c = await applyRestore(data);
+      var c = await applyRestore(data, z);
       delete sheet.dataset.lock;
       render();
       setSheetBody('<p class="ok-text">取り込みが終わりました。</p><div class="info"><dt>追加</dt><dd>' + c.added + '件</dd><dt>更新</dt><dd>' + c.updated + '件</dd><dt>変更なし</dt><dd>' + c.skipped + '件</dd></div>',
@@ -1183,11 +1568,11 @@ async function onRestoreFile(file) {
     } catch (e) {
       delete sheet.dataset.lock;
       await reloadAll(); render();
-      setSheetBody('<p class="warn-text">取り込めませんでした</p><p class="hint">' + esc(errMsg(e)) + '</p>', '<button class="btn block" data-close>閉じる</button>');
+      setSheetBody('<p class="warn-text">途中で止まりました</p><p class="hint">' + esc(errMsg(e)) + '</p><p class="hint">そこまでの分は取り込まれています。もう一度同じファイルで取り込むと続きから入ります。</p>', '<button class="btn block" data-close>閉じる</button>');
     }
   });
 }
-async function applyRestore(data) {
+async function applyRestore(data, z) {
   var c = { added: 0, updated: 0, skipped: 0 };
   var li = new Map(items.map(function (r) { return [r.id, r]; })), lp = new Map(prices.map(function (r) { return [r.id, r]; }));
   var putI = [], putP = [];
@@ -1204,10 +1589,29 @@ async function applyRestore(data) {
     if (cur && (cur.updatedAt || 0) >= (r.updatedAt || 0)) { c.skipped++; return; }
     putP.push(r); if (cur) c.updated++; else c.added++;
   });
-  await dbWrite(['items', 'prices'], function (t) {
+  // 写真のない記録は、まとめて書く（取り込む記録が写真なしなら、こちらにある写真も外す）
+  var plain = putP.filter(function (r) { return !(z && r.hasPhoto); });
+  plain.forEach(function (r) { r.hasPhoto = false; r.photoBytes = 0; r.thumbBytes = 0; });
+  await dbWrite(['items', 'prices', 'photos', 'thumbs'], function (t) {
     putI.forEach(function (r) { t.objectStore('items').put(r); });
-    putP.forEach(function (r) { t.objectStore('prices').put(r); });
+    plain.forEach(function (r) { t.objectStore('prices').put(r); t.objectStore('photos').delete(r.id); t.objectStore('thumbs').delete(r.id); });
   });
+  plain.forEach(function (r) { dropThumb(r.id); });
+  // 写真のある記録は、1件ずつ写真と一緒に書く
+  var withPh = putP.filter(function (r) { return z && r.hasPhoto; });
+  for (var i = 0; i < withPh.length; i++) {
+    var r = withPh[i], pbuf = await z.read('photos/' + r.id + '.jpg'), tbuf = pbuf ? await z.read('thumbs/' + r.id + '.jpg') : null;
+    if (pbuf && !tbuf) tbuf = await blobToBuf(await thumbFrom(new Blob([pbuf], { type: 'image/jpeg' })));
+    if (pbuf) { r.photoBytes = pbuf.byteLength; r.thumbBytes = tbuf.byteLength; }
+    else { r.hasPhoto = false; r.photoBytes = 0; r.thumbBytes = 0; }
+    await dbWrite(['prices', 'photos', 'thumbs'], function (t) {
+      t.objectStore('prices').put(r);
+      if (pbuf) { t.objectStore('photos').put({ id: r.id, type: 'image/jpeg', buf: pbuf }); t.objectStore('thumbs').put({ id: r.id, type: 'image/jpeg', buf: tbuf }); }
+      else { t.objectStore('photos').delete(r.id); t.objectStore('thumbs').delete(r.id); }
+    });
+    dropThumb(r.id);
+    if (i % 5 === 4) await tick();
+  }
   var s = data.settings || {};
   if (Array.isArray(s.favShops)) {
     var fav = favShops().slice();
@@ -1223,7 +1627,7 @@ function openReset() {
   var unsaved = unsavedCount();
   var body = '<div class="remind"><p class="remind-lead">アプリを初期状態に戻します</p>' +
     '<p>ホーム画面に追加したばかりの状態に戻ります。次のものが<b>すべて消え、元に戻せません</b>。</p>' +
-    '<div class="lose"><div><span>商品</span><b>' + items.length + '件</b></div><div><span>記録</span><b>' + prices.length + '件</b></div><div><span>よく行くお店</span><b>' + favShops().length + '件</b></div><div><span>判定の期間などの設定</span><b>すべて</b></div></div>' +
+    '<div class="lose"><div><span>商品</span><b>' + items.length + '件</b></div><div><span>記録</span><b>' + prices.length + '件</b></div><div><span>写真</span><b>' + photoStats().n + '枚</b></div><div><span>よく行くお店</span><b>' + favShops().length + '件</b></div><div><span>判定の期間などの設定</span><b>すべて</b></div></div>' +
     '<p class="hint" style="margin-top:0">ホーム画面のアイコン、「ファイル」アプリなどに保存したバックアップ、ほかのアプリの記録は消えません。</p>' +
     (unsaved ? '<div class="warn-box"><p>まだバックアップしていない記録が <b>' + unsaved + '件</b> あります。消す前に、バックアップをとっておくことをおすすめします。</p><button class="btn primary block" id="rsBackup">先にバックアップする</button></div>' : '') +
     '<div class="field"><label for="rsWord">消してよければ、下の欄に「' + RESET_WORD + '」と入力してください</label><input type="text" class="inp" id="rsWord" autocomplete="off" autocapitalize="off" enterkeyhint="done" placeholder="' + RESET_WORD + '"></div></div>';
@@ -1259,14 +1663,14 @@ async function runReset() {
 document.addEventListener('click', function (e) {
   var a = e.target.closest('[data-act]'); if (!a) return;
   var act = a.dataset.act;
-  if (act === 'pick') { ck.itemId = a.dataset.id; ck.q = ''; render(); $('#view').scrollTop = 0; }
+  if (act === 'pick') { ckResetPhoto(); ck.itemId = a.dataset.id; ck.q = ''; render(); $('#view').scrollTop = 0; }
   else if (act === 'new-item') {
-    openItemForm(null, ck.q.trim(), function (it) { closeSheet(true); ck.itemId = it.id; ck.q = ''; tab = 'check'; render(); setTimeout(function () { var p = $('#ckPrice'); if (p) p.focus(); }, 280); });
+    openItemForm(null, ck.q.trim(), function (it) { closeSheet(true); ckResetPhoto(); ck.itemId = it.id; ck.q = ''; tab = 'check'; render(); setTimeout(function () { var p = $('#ckPrice'); if (p) p.focus(); }, 280); });
   }
   else if (act === 'preset') addPreset(a.dataset.name);
   else if (act === 'preset-browse') openPresetBrowser();
   else if (act === 'new-item-list') { openItemForm(null, listQ.trim(), function () { closeSheet(true); render(); }); }
-  else if (act === 'ck-change') { ck.itemId = ''; ck.size = ''; ck.count = 1; render(); setTimeout(function () { var q = $('#ckQ'); if (q) q.focus(); }, 50); }
+  else if (act === 'ck-change') { ckResetPhoto(); ck.itemId = ''; ck.size = ''; ck.count = 1; render(); setTimeout(function () { var q = $('#ckQ'); if (q) q.focus(); }, 50); }
   else if (act === 'ck-detail') openItemDetail(ck.itemId);
   else if (act === 'cnt-' || act === 'cnt+') {
     ck.count = Math.min(99, Math.max(1, ck.count + (act === 'cnt+' ? 1 : -1)));
@@ -1278,9 +1682,13 @@ document.addEventListener('click', function (e) {
   }
   else if (act === 'save') saveCheck(a.dataset.kind);
   else if (act === 'open-item') openItemDetail(a.dataset.id);
+  else if (act === 'view-photo') {
+    var vp = prices.filter(function (p) { return p.id === a.dataset.id; })[0];
+    if (vp) openViewer(null, vp.id, photoCaption(vp));
+  }
   else if (act === 'check-item') {
     var cid = sheet.dataset.item; closeSheet(true);
-    if (ck.itemId !== cid) { ck.itemId = cid; ck.price = ''; ck.size = ''; ck.count = 1; ck.discType = 'none'; ck.discVal = ''; }
+    if (ck.itemId !== cid) { ckResetPhoto(); ck.itemId = cid; ck.price = ''; ck.size = ''; ck.count = 1; ck.discType = 'none'; ck.discVal = ''; }
     goTab('check');
   }
   else if (act === 'edit-item') {
@@ -1291,7 +1699,7 @@ document.addEventListener('click', function (e) {
     var di = itemById(sheet.dataset.item); if (!di) return;
     var dn = pricesOf(di.id).length;
     if (!confirm('「' + di.name + '」を削除しますか？\n' + (dn ? 'この商品の記録' + dn + '件も一緒に消えます。' : '') + '元に戻せません。')) return;
-    delItem(di.id).then(function () { if (ck.itemId === di.id) ck.itemId = ''; closeSheet(true); toast('削除しました'); render(); }).catch(function (er) { alert(errMsg(er)); });
+    delItem(di.id).then(function () { if (ck.itemId === di.id) { ck.itemId = ''; ckResetPhoto(); } closeSheet(true); toast('削除しました'); render(); }).catch(function (er) { alert(errMsg(er)); });
   }
   else if (act === 'edit-rec' || act === 'add-rec') {
     var item = itemById(sheet.dataset.item); if (!item) return;
