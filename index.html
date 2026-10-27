@@ -231,6 +231,7 @@ main{flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;oversc
 .sheet-body{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:14px 16px 24px}
 .sheet-foot{padding:10px 16px calc(env(safe-area-inset-bottom) + 10px);border-top:1px solid var(--line);background:var(--bg)}
 .sheet-foot:empty{display:none}
+.foot-note{font-size:13px;color:var(--sub);text-align:center;margin:0 0 8px}
 
 /* 設定 */
 .set-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--line);font-size:14px;gap:10px}
@@ -300,7 +301,7 @@ body.sheet-open .toast{bottom:calc(env(safe-area-inset-bottom) + 90px)}
 
 <script>
 'use strict';
-var APP_VERSION = '1.3.0';
+var APP_VERSION = '1.3.1';
 var DB_NAME = 'tanka-memo';          // ほかのアプリと混ざらない専用の保存場所
 var BACKUP_APP_ID = 'tanka-memo';
 var REMIND_COUNT = 30;               // バックアップしていない記録がこの件数たまったらお知らせ
@@ -1358,7 +1359,9 @@ function openItemForm(item, presetName, onDone, back) {
     '<div class="field"><span class="lbl">消費税</span><div class="seg" id="ifTax"><button data-v="10"' + (it.tax === 10 ? ' class="on"' : '') + '>10％（日用品など）</button><button data-v="8"' + (it.tax === 8 ? ' class="on"' : '') + '>8％（食品）</button></div>' +
     '<div class="note">税抜の値札を税込に直すときに使います。</div></div>' +
     '<div class="field"><label for="ifMemo">メモ</label><input type="text" class="inp" id="ifMemo" value="' + esc(it.memo || '') + '" placeholder="なくてもOK" autocomplete="off"></div>';
-  openSheet(item ? '商品を直す' : '商品を登録', body, '<button class="btn primary block" id="ifSave">' + (item ? '保存する' : '登録する') + '</button>', back);
+  openSheet(item ? '商品を直す' : '商品を登録', body,
+    item ? '<button class="btn primary block" id="ifSave">保存する</button>'
+      : '<p class="foot-note">登録すると、次の画面で値段と内容量を入れられます。</p><button class="btn primary block" id="ifSave">登録して値段を入れる</button>', back);
   function unitNote() {
     var u = unitOf(it);
     $('#ifUnitNote').textContent = u.base + u.label + 'あたりの値段で比べます。' + (hasRecs && u.k !== item.unit ? '今ある記録の数字はそのままで、単位だけが変わります。' : '');
@@ -1786,17 +1789,23 @@ async function runReset() {
   $('#rsReload').addEventListener('click', function () { location.reload(); });
 }
 
+// 新しく登録した商品は、どこから登録しても、そのまま値段を入れるチェック画面に進む
+function checkNewItem(it) {
+  closeSheet(true); ckResetPhoto();
+  ck.itemId = it.id; ck.q = ''; ck.price = ''; ck.size = ''; ck.count = 1; ck.discType = 'none'; ck.discVal = ''; ck.memo = '';
+  tab = 'check'; render(); $('#view').scrollTop = 0;
+  setTimeout(function () { var p = $('#ckPrice'); if (p) p.focus(); }, 280);
+}
+
 /* ===== ボタンの動き（まとめて受け付ける） ===== */
 document.addEventListener('click', function (e) {
   var a = e.target.closest('[data-act]'); if (!a) return;
   var act = a.dataset.act;
   if (act === 'pick') { ckResetPhoto(); ck.itemId = a.dataset.id; ck.q = ''; render(); $('#view').scrollTop = 0; }
-  else if (act === 'new-item') {
-    openItemForm(null, ck.q.trim(), function (it) { closeSheet(true); ckResetPhoto(); ck.itemId = it.id; ck.q = ''; tab = 'check'; render(); setTimeout(function () { var p = $('#ckPrice'); if (p) p.focus(); }, 280); });
-  }
+  else if (act === 'new-item') openItemForm(null, ck.q.trim(), checkNewItem);
   else if (act === 'preset') addPreset(a.dataset.name);
   else if (act === 'preset-browse') openPresetBrowser();
-  else if (act === 'new-item-list') { openItemForm(null, listQ.trim(), function () { closeSheet(true); render(); }); }
+  else if (act === 'new-item-list') openItemForm(null, listQ.trim(), checkNewItem);
   else if (act === 'ck-change') { ckResetPhoto(); ck.itemId = ''; ck.size = ''; ck.count = 1; render(); setTimeout(function () { var q = $('#ckQ'); if (q) q.focus(); }, 50); }
   else if (act === 'ck-detail') openItemDetail(ck.itemId);
   else if (act === 'cnt-' || act === 'cnt+') {

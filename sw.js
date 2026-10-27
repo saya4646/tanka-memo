@@ -2,7 +2,7 @@
 // 同じGitHubアカウントの残業メモ・ゲット図鑑と場所を共有するため、
 // 「tanka-memo-」で始まる自分の保管分だけを扱い、ほかのアプリの分には触れない。
 var CACHE_PREFIX = "tanka-memo-";
-var CACHE_NAME = CACHE_PREFIX + "v9";
+var CACHE_NAME = CACHE_PREFIX + "v10";
 var FILES = [
   "./",
   "./index.html",
