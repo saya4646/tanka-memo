@@ -31,7 +31,7 @@
     --bad:#ff6b6b;--shadow:none;
   }
 }
-*{box-sizing:border-box}
+*{box-sizing:border-box;touch-action:manipulation}   /* ダブルタップでの拡大を止める（2本指で広げる拡大はそのまま使える） */
 html{-webkit-text-size-adjust:100%}
 body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Hiragino Kaku Gothic ProN","Noto Sans JP","Noto Sans CJK JP",sans-serif;font-size:15px;line-height:1.5;-webkit-tap-highlight-color:transparent;overscroll-behavior-y:none}
 html,body{height:100%;overflow:hidden}
@@ -298,7 +298,7 @@ body.sheet-open .toast{bottom:calc(env(safe-area-inset-bottom) + 90px)}
 
 <script>
 'use strict';
-var APP_VERSION = '1.2.3';
+var APP_VERSION = '1.2.4';
 var DB_NAME = 'tanka-memo';          // ほかのアプリと混ざらない専用の保存場所
 var BACKUP_APP_ID = 'tanka-memo';
 var REMIND_COUNT = 30;               // バックアップしていない記録がこの件数たまったらお知らせ
