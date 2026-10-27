@@ -296,7 +296,7 @@ body.sheet-open .toast{bottom:calc(env(safe-area-inset-bottom) + 90px)}
 
 <script>
 'use strict';
-var APP_VERSION = '1.2.0';
+var APP_VERSION = '1.2.1';
 var DB_NAME = 'tanka-memo';          // ほかのアプリと混ざらない専用の保存場所
 var BACKUP_APP_ID = 'tanka-memo';
 var REMIND_COUNT = 30;               // バックアップしていない記録がこの件数たまったらお知らせ
@@ -1129,9 +1129,12 @@ async function saveCheck(kind) {
     if (shop !== settings.lastShop) saveSetting('lastShop', shop).catch(function () {});
   } catch (e) { alert(errMsg(e)); return; }
   if (!settings.persistAsked) { saveSetting('persistAsked', true).catch(function () {}); askPersist(); }
-  ck.price = ''; ck.discType = 'none'; ck.discVal = ''; ck.memo = ''; ckResetPhoto();
+  // 記録したら、商品を選ぶ最初の画面に戻す（お店の選択だけは次も使うので残す）。
+  // さっきの商品は「最近使った商品」の先頭に出るので、1回のタップで戻れる
+  ck.itemId = ''; ck.q = ''; ck.price = ''; ck.size = ''; ck.count = 1; ck.discType = 'none'; ck.discVal = ''; ck.memo = ''; ckResetPhoto();
   toast(kind === 'bought' ? '「買った」で記録しました' : '「見ただけ」で記録しました');
   render();
+  $('#view').scrollTop = 0;
 }
 
 /* ===== 商品の一覧 ===== */
