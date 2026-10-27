@@ -106,6 +106,8 @@ main{flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;oversc
 .pick.preset small{display:block;white-space:normal;margin-top:1px}
 .pick.new{border:1.5px dashed var(--pri);color:var(--pri);background:transparent;box-shadow:none;justify-content:center;font-weight:700}
 .sec-title{font-size:13px;color:var(--sub);font-weight:700;margin:16px 2px 6px}
+.grp-title{font-size:17px;font-weight:800;margin:22px 2px 0;padding-bottom:6px;border-bottom:2px solid var(--pri)}
+#psList .grp-jump+.grp-title,#psList .grp-title:first-child{margin-top:12px}
 .chosen{display:flex;align-items:center;gap:10px}
 .chosen .nm{flex:1;min-width:0}
 .chosen{flex-wrap:wrap}
@@ -298,7 +300,7 @@ body.sheet-open .toast{bottom:calc(env(safe-area-inset-bottom) + 90px)}
 
 <script>
 'use strict';
-var APP_VERSION = '1.2.4';
+var APP_VERSION = '1.3.0';
 var DB_NAME = 'tanka-memo';          // ほかのアプリと混ざらない専用の保存場所
 var BACKUP_APP_ID = 'tanka-memo';
 var REMIND_COUNT = 30;               // バックアップしていない記録がこの件数たまったらお知らせ
@@ -314,14 +316,16 @@ var UNITS = [
   { k: 'kumi', label: '組', base: 100 },
   { k: 'm', label: 'm', base: 1 },
   { k: 'hon', label: '本', base: 1 },
-  { k: 'kai', label: '回', base: 1 }
+  { k: 'kai', label: '回', base: 1 },
+  { k: 'kin', label: '斤', base: 1 }
 ];
 
 // 最初から登録しておく「よく行くお店」（この順で並ぶ）
 var DEFAULT_SHOPS = ['ツルハ', 'ウエルシア', 'サンドラッグ', 'アオキ', 'カワチ', 'ヤマザワ', 'セイムス'];
 
-// ドラッグストアの日用品の商品名候補（2026年10月にメーカー公式サイト・販売店サイトで名前と容量の単位を確認）
-// n：商品名（ブランド＋シリーズ）、u：パッケージの容量の単位、k：検索で引っかけたい別の言い方
+// ドラッグストアの日用品・食品の商品名候補（2026年10月にメーカー公式サイト・販売店サイトで名前と容量の単位を確認。牛乳・卵などは一般的な名前）
+// 各行：[商品名（ブランド＋シリーズ）, パッケージの容量の単位, 検索で引っかけたい別の言い方]
+// g：大見出し（なし＝日用品、food＝食品・飲料）、t：消費税（なし＝10％）
 var PRESET_CATS = [
   { c: '洗濯洗剤', k: '洗濯洗剤 せんたく 洗剤 液体洗剤', list: [
     ['アタックZERO', 'g', 'アタックゼロ'], ['アタックZERO 部屋干し', 'g', 'アタックゼロ'], ['アタックZERO ドラム式専用', 'g', 'アタックゼロ'],
@@ -387,10 +391,115 @@ var PRESET_CATS = [
     ['クリアクリーン', 'g', ''], ['ピュオーラ', 'g', ''], ['クリニカ ハミガキ', 'g', ''], ['NONIO ハミガキ', 'g', 'ノニオ'],
     ['デンターシステマ ハミガキ', 'g', 'システマ'], ['システマEX ハミガキ', 'g', 'システマ']
   ] }
+  ,
+  // ===== 2026年10月追加（日用品） =====
+  { c: '台所用品', k: 'キッチン 台所 アルミ ホイル スポンジ ゴミ袋 ごみ袋 ポリ袋 保存袋', list: [
+    ['アルミホイル 25cm', 'm', 'アルミはく'], ['アルミホイル 30cm', 'm', 'アルミはく'],
+    ['スコッチ・ブライト 抗菌ウレタンスポンジ', 'ko', 'スコッチブライト 3M'],
+    ['ゴミ袋 45L', 'mai', 'ごみ袋 ポリ袋'], ['ゴミ袋 30L', 'mai', 'ごみ袋 ポリ袋'], ['ポリ袋（小）', 'mai', 'ビニール袋 レジ袋'],
+    ['ジップロック フリーザーバッグ M', 'mai', 'ジップ 保存袋'], ['ジップロック ストックバッグ M', 'mai', 'ジップ 保存袋']
+  ] },
+  { c: '食洗機用洗剤', k: '食洗機 食器洗い乾燥機 食洗器', list: [
+    ['食洗機用キュキュット クエン酸効果', 'g', '食器洗い乾燥機専用'], ['フィニッシュ パワーキューブ', 'ko', 'finish']
+  ] },
+  { c: '掃除用品', k: '掃除 そうじ 洗剤 トイレ お風呂 風呂 カビ 床', list: [
+    ['トイレマジックリン 消臭・洗浄スプレー', 'ml', 'トイレ用洗剤'], ['バスマジックリン 泡立ちスプレー', 'ml', 'お風呂用洗剤 風呂'],
+    ['マジックリン ハンディスプレー', 'ml', '住居用洗剤 キッチン 油汚れ'],
+    ['カビキラー', 'g', 'カビ取り'], ['強力カビハイター ハンディスプレー', 'ml', 'カビ取り'],
+    ['クイックルワイパー ドライシート', 'mai', 'フローリング'], ['クイックルワイパー 立体吸着ウエットシート', 'mai', 'フローリング ウェット']
+  ] },
+  { c: '消臭剤・芳香剤', k: '消臭 芳香 におい 匂い', list: [
+    ['ファブリーズ W除菌', 'ml', '布用 スプレー'], ['トイレの消臭力', 'ml', 'しょうしゅうりき 置き型']
+  ] },
+  { c: '歯ブラシ・洗口液', k: '歯ブラシ ハブラシ はぶらし 洗口液 マウスウォッシュ', list: [
+    ['クリニカ ハブラシ', 'hon', '歯ブラシ'], ['デンターシステマ ハブラシ', 'hon', 'システマ 歯ブラシ'],
+    ['薬用リステリン', 'ml', 'リステリン'], ['モンダミン', 'ml', '']
+  ] },
+  { c: '洗顔料', k: '洗顔 洗顔フォーム', list: [
+    ['専科 パーフェクトホイップ', 'g', '洗顔専科']
+  ] },
+  { c: 'マスク・衛生用品', k: 'マスク 綿棒 めんぼう ウェットティッシュ', list: [
+    ['超快適マスク', 'mai', 'ユニチャーム'], ['不織布マスク', 'mai', 'ふしょくふ'],
+    ['綿棒', 'hon', 'めんぼう'], ['シルコット ウェットティッシュ', 'mai', 'ウエットティッシュ 除菌']
+  ] },
+  { c: '電池・カイロ', k: '乾電池 電池 でんち カイロ', list: [
+    ['アルカリ乾電池 単3', 'hon', '電池 単三'], ['アルカリ乾電池 単4', 'hon', '電池 単四'],
+    ['貼るカイロ', 'ko', 'はるカイロ ホッカイロ'], ['貼らないカイロ', 'ko', 'はらないカイロ ホッカイロ']
+  ] },
+  { c: '入浴剤', k: '入浴剤 お風呂', list: [
+    ['バブ', 'ko', '錠 炭酸'], ['きき湯', 'g', 'バスクリン 炭酸'], ['バスクリン', 'g', '']
+  ] },
+  { c: '生理用品', k: '生理用品 ナプキン', list: [
+    ['ソフィ はだおもい', 'mai', 'ナプキン ユニチャーム'], ['ソフィ センターインコンパクト1/2', 'mai', 'ナプキン センターイン'],
+    ['ロリエ ナプキン', 'mai', '花王'], ['エリス ナプキン', 'mai', '大王製紙'], ['おりものシート', 'mai', 'パンティライナー']
+  ] },
+  { c: '化粧品・スキンケア', k: '化粧品 スキンケア 化粧水 乳液 日焼け止め クレンジング メイク落とし', list: [
+    ['肌ラボ 極潤ヒアルロン液', 'ml', '化粧水 ごくじゅん'], ['肌ラボ 極潤 ヒアルロン乳液', 'ml', '乳液 ごくじゅん'],
+    ['ナチュリエ ハトムギ化粧水', 'ml', 'スキンコンディショナー'], ['ニベアクリーム', 'g', 'NIVEA 青缶'],
+    ['ビオレUV アクアリッチ ウォータリーエッセンス', 'g', '日焼け止め'], ['スキンアクア スーパーモイスチャーエッセンス', 'g', '日焼け止め'],
+    ['ビオレ メイク落とし パーフェクトオイル', 'ml', 'クレンジング']
+  ] },
+  // ===== 2026年10月追加（食品・飲料。消費税8％。お酒だけ10％） =====
+  { g: 'food', t: 8, c: '水', k: '水 みず ミネラルウォーター 天然水', list: [
+    ['サントリー天然水', 'ml', ''], ['い・ろ・は・す', 'ml', 'いろはす'], ['アルカリイオンの水', 'ml', 'キリン'], ['クリスタルガイザー', 'ml', '']
+  ] },
+  { g: 'food', t: 8, c: 'お茶', k: 'お茶 おちゃ 緑茶 麦茶 むぎ茶', list: [
+    ['お〜いお茶 緑茶', 'ml', 'おーいお茶 おいお茶 伊藤園'], ['伊右衛門', 'ml', 'いえもん'], ['伊右衛門 特茶', 'ml', 'いえもん とくちゃ'],
+    ['綾鷹', 'ml', 'あやたか'], ['生茶', 'ml', 'なまちゃ'], ['健康ミネラルむぎ茶', 'ml', '麦茶'], ['爽健美茶', 'ml', 'そうけんびちゃ'],
+    ['十六茶', 'ml', 'じゅうろくちゃ'], ['サントリー 胡麻麦茶', 'ml', 'ごまむぎちゃ']
+  ] },
+  { g: 'food', t: 8, c: '炭酸・ジュース', k: '炭酸 ジュース 清涼飲料 スポーツドリンク', list: [
+    ['コカ・コーラ', 'ml', 'コカコーラ'], ['三ツ矢サイダー', 'ml', 'みつやサイダー'], ['ウィルキンソン タンサン', 'ml', 'ウイルキンソン 炭酸水'],
+    ['カルピスウォーター', 'ml', ''], ['ポカリスエット', 'ml', 'スポーツドリンク'], ['アクエリアス', 'ml', 'スポーツドリンク'],
+    ['野菜生活100', 'ml', '野菜ジュース'], ['カゴメ トマトジュース', 'ml', '']
+  ] },
+  { g: 'food', t: 8, c: 'コーヒー・紅茶', k: 'コーヒー こーひー 紅茶 インスタント', list: [
+    ['ネスカフェ ゴールドブレンド', 'g', 'インスタントコーヒー 詰め替え'], ['マキシム インスタントコーヒー', 'g', 'AGF'],
+    ['ブレンディ スティック カフェオレ', 'hon', 'AGF スティックコーヒー'],
+    ['午後の紅茶 ストレートティー', 'ml', 'ごごてぃー'], ['午後の紅茶 ミルクティー', 'ml', 'ごごてぃー']
+  ] },
+  { g: 'food', t: 8, c: '牛乳・卵・パンなど', k: '牛乳 たまご 卵 パン 豆腐 納豆 乳製品', list: [
+    ['牛乳', 'ml', 'ぎゅうにゅう'], ['低脂肪乳', 'ml', '牛乳'], ['豆乳', 'ml', 'とうにゅう'], ['ヨーグルト', 'g', ''],
+    ['卵', 'ko', 'たまご 玉子'], ['納豆', 'ko', 'なっとう パック'], ['豆腐', 'g', 'とうふ'], ['食パン', 'kin', 'しょくぱん パン']
+  ] },
+  { g: 'food', t: 8, c: '調味料', k: '調味料 しょうゆ 醤油 油 つゆ だし', list: [
+    ['キッコーマン いつでも新鮮 しぼりたて生しょうゆ', 'ml', '醤油'], ['キッコーマン こいくちしょうゆ', 'ml', '醤油'],
+    ['キユーピー マヨネーズ', 'g', 'キューピー'], ['味の素 ピュアセレクト マヨネーズ', 'g', ''],
+    ['カゴメ トマトケチャップ', 'g', ''], ['日清キャノーラ油', 'g', 'サラダ油'], ['AJINOMOTO さらさらキャノーラ油', 'g', 'サラダ油 味の素'],
+    ['ミツカン 追いがつおつゆ2倍', 'ml', 'めんつゆ'], ['ヤマサ 昆布つゆ', 'ml', 'めんつゆ'], ['ほんだし', 'g', '味の素 和風だし'],
+    ['キユーピー 深煎りごまドレッシング', 'ml', 'キューピー'], ['砂糖（上白糖）', 'g', 'さとう'], ['食塩', 'g', 'しお 塩']
+  ] },
+  { g: 'food', t: 8, c: '麺・ごはん', k: '麺 めん ラーメン カップ麺 インスタント ごはん ご飯', list: [
+    ['カップヌードル', 'ko', '日清 カップ麺'], ['カップヌードル シーフードヌードル', 'ko', '日清 カップ麺'],
+    ['どん兵衛 きつねうどん', 'ko', '日清 どんべえ カップ麺'], ['赤いきつねうどん', 'ko', 'マルちゃん カップ麺'],
+    ['日清焼そばU.F.O.', 'ko', 'ユーフォー UFO カップ麺'], ['チキンラーメン', 'ko', '日清 袋麺'], ['出前一丁', 'ko', '日清 袋麺'],
+    ['サッポロ一番 みそラーメン', 'ko', '袋麺'], ['サッポロ一番 塩らーめん', 'ko', '袋麺'], ['マルちゃん正麺 醤油味', 'ko', '袋麺'],
+    ['マ・マー スパゲティ', 'g', 'パスタ ママー'], ['サトウのごはん', 'g', 'パックごはん レトルトごはん']
+  ] },
+  { g: 'food', t: 8, c: 'レトルト・缶詰', k: 'レトルト カレー 缶詰 ツナ', list: [
+    ['ボンカレーゴールド', 'ko', 'レトルトカレー'], ['ククレカレー', 'ko', 'レトルトカレー'], ['カリー屋カレー', 'ko', 'レトルトカレー ハウス'],
+    ['バーモントカレー', 'g', 'カレールー ハウス'], ['ジャワカレー', 'g', 'カレールー ハウス'],
+    ['シーチキン Lフレーク', 'g', 'はごろも ツナ缶'], ['ツナ缶', 'g', 'ツナ']
+  ] },
+  { g: 'food', t: 8, c: 'お菓子', k: 'お菓子 おかし スナック', list: [
+    ['ポテトチップス うすしお味', 'g', 'カルビー ポテチ'], ['ポテトチップス コンソメパンチ', 'g', 'カルビー ポテチ'],
+    ['じゃがりこ サラダ', 'g', 'カルビー'], ['亀田の柿の種', 'g', 'かきのたね'], ['ハッピーターン', 'g', '亀田'],
+    ['カロリーメイト ブロック', 'hon', '大塚製薬']
+  ] },
+  { g: 'food', t: 8, c: '冷凍食品', k: '冷凍食品 れいとう', list: [
+    ['味の素 ギョーザ', 'ko', '餃子 冷凍'], ['ニチレイ 本格炒め炒飯', 'g', 'チャーハン 冷凍'], ['味の素 ザ★チャーハン', 'g', 'ザチャーハン 冷凍'],
+    ['冷凍うどん', 'ko', 'うどん']
+  ] },
+  { g: 'food', t: 10, c: 'お酒（消費税10％）', k: 'お酒 酒 ビール 発泡酒 チューハイ 缶', list: [
+    ['アサヒスーパードライ', 'ml', 'ビール'], ['キリン一番搾り生ビール', 'ml', 'ビール'], ['サッポロ生ビール黒ラベル', 'ml', 'ビール'],
+    ['ザ・プレミアム・モルツ', 'ml', 'プレモル プレミアムモルツ ビール'], ['本麒麟', 'ml', 'ほんきりん'], ['金麦', 'ml', 'きんむぎ'],
+    ['のどごし生', 'ml', 'のどごし'], ['キリン 氷結', 'ml', 'ひょうけつ チューハイ'], ['−196', 'ml', 'マイナス196 チューハイ サントリー'],
+    ['ほろよい', 'ml', 'チューハイ サントリー']
+  ] }
 ];
 var PRESETS = [];
 PRESET_CATS.forEach(function (cat) {
-  cat.list.forEach(function (p) { PRESETS.push({ name: p[0], unit: p[1], cat: cat.c, key: norm(p[0] + ' ' + p[2] + ' ' + cat.c + ' ' + cat.k) }); });
+  cat.list.forEach(function (p) { PRESETS.push({ name: p[0], unit: p[1], cat: cat.c, tax: cat.t || 10, key: norm(p[0] + ' ' + p[2] + ' ' + cat.c + ' ' + cat.k) }); });
 });
 var PERIODS = [
   { d: 183, label: '半年' },
@@ -921,7 +1030,7 @@ function renderCheck(v) {
       '<div id="ckList"></div></section>';
     if (!items.length) {
       html += '<section class="card help"><h3>使い方</h3>' +
-        '<p>1. お店で気になった商品の名前を上の欄に入れます。よくある日用品は候補に出るので、タップするだけで登録できます。</p>' +
+        '<p>1. お店で気になった商品の名前を上の欄に入れます。よくある日用品や食品は候補に出るので、タップするだけで登録できます。</p>' +
         '<p>2. 値札の値段と、パッケージに書いてある内容量（mLやg）を入れます。「2.4倍」のような倍率の表示は気にしなくて大丈夫です。</p>' +
         '<p>3. 「買った」か「見ただけ」で記録します。記録がたまるほど、安いか高いかの判定ができるようになります。値札や商品の写真も一緒に残せます（なくてもOK）。</p></section>';
     }
@@ -941,7 +1050,7 @@ function renderCheck(v) {
     '<div class="seg" id="ckTax"><button data-v="in"' + (ck.taxMode === 'in' ? ' class="on"' : '') + '>税込</button><button data-v="ex"' + (ck.taxMode === 'ex' ? ' class="on"' : '') + '>税抜</button></div></div></div>' +
     '<div class="field"><label for="ckSize">内容量（1個あたり）と個数</label><div class="size-row"><div class="unit-in"><input type="text" inputmode="decimal" class="inp num" id="ckSize" value="' + esc(ck.size) + '" placeholder="0" autocomplete="off"><span>' + esc(u.label) + '</span></div>' +
     '<div class="stepper"><button data-act="cnt-" aria-label="個数を減らす">−</button><output id="ckCount">×' + ck.count + '</output><button data-act="cnt+" aria-label="個数を増やす">＋</button></div></div>' +
-    '<div class="note">' + (u.k === 'ml' ? '1.5Lなら1500と入れます。' : u.k === 'g' ? '1kgなら1000と入れます。' : '1パックに入っている数を入れます。') + 'まとめ売り（例：3個パック）のときは、右の個数を増やします。</div></div>' +
+    '<div class="note">' + (u.k === 'ml' ? '1.5Lなら1500と入れます。' : u.k === 'g' ? '1kgなら1000と入れます。' : u.k === 'kin' ? '食パン1袋（6枚切り・8枚切りなど）は、ふつう1斤です。' : '1パックに入っている数を入れます。') + 'まとめ売り（例：3個パック）のときは、右の個数を増やします。</div></div>' +
     '<div class="field"><span class="lbl">割引</span><div class="seg" id="ckDisc"><button data-v="none"' + (ck.discType === 'none' ? ' class="on"' : '') + '>なし</button><button data-v="pct"' + (ck.discType === 'pct' ? ' class="on"' : '') + '>％引き</button><button data-v="yen"' + (ck.discType === 'yen' ? ' class="on"' : '') + '>円引き</button></div>' +
     '<div class="unit-in' + (ck.discType === 'none' ? ' hidden' : '') + '" id="ckDiscBox" style="margin-top:8px"><input type="text" inputmode="decimal" class="inp num" id="ckDiscVal" value="' + esc(ck.discVal) + '" placeholder="0" autocomplete="off"><span id="ckDiscUnit">' + (ck.discType === 'yen' ? '円' : '％') + '</span></div></div>' +
     '</section>' +
@@ -1018,7 +1127,7 @@ function presetMatches(q) {
   return PRESETS.filter(function (p) { return matchQ(p.key, q) && !reg.has(norm(p.name)); });
 }
 function presetBtnHTML(p, noCat) {
-  return '<button class="pick preset" data-act="preset" data-name="' + esc(p.name) + '"><b>' + esc(p.name) + '</b><small>' + (noCat ? '' : esc(p.cat) + '・') + perLabel({ unit: p.unit }) + 'で比べます</small></button>';
+  return '<button class="pick preset" data-act="preset" data-name="' + esc(p.name) + '"><b>' + esc(p.name) + '</b><small>' + (noCat ? '' : esc(p.cat) + '・') + perLabel({ unit: p.unit }) + 'で比べます' + (p.tax === 8 ? '・消費税8％' : '') + '</small></button>';
 }
 async function addPreset(name) {
   var p = PRESETS.filter(function (x) { return x.name === name; })[0]; if (!p) return;
@@ -1026,7 +1135,7 @@ async function addPreset(name) {
   var it = ex;
   if (!it) {
     var now = Date.now();
-    it = { id: uid(), name: p.name, unit: p.unit, tax: 10, memo: '', createdAt: now, updatedAt: now, lastUsedAt: now };
+    it = { id: uid(), name: p.name, unit: p.unit, tax: p.tax, memo: '', createdAt: now, updatedAt: now, lastUsedAt: now };
     try { await putItem(it); } catch (e) { alert(errMsg(e)); return; }
     toast('「' + p.name + '」を登録しました');
   }
@@ -1039,24 +1148,37 @@ var presetQ = '';
 function openPresetBrowser() {
   presetQ = '';
   openSheet('よくある商品から選ぶ',
-    '<input type="search" class="search" id="psQ" placeholder="しぼりこむ（例：柔軟剤、ティッシュ）" autocomplete="off">' +
-    '<p class="hint">タップすると商品として登録され、そのままチェックできます。単位（mL・gなど）はパッケージの表示に合わせてあります。</p>' +
+    '<input type="search" class="search" id="psQ" placeholder="しぼりこむ（例：お茶、カップ麺）" autocomplete="off">' +
+    '<p class="hint">タップすると商品として登録され、そのままチェックできます。単位（mL・gなど）はパッケージの表示に合わせてあります。食品は消費税8％で登録されます。</p>' +
     '<div id="psList"></div>', '');
   $('#psQ').addEventListener('input', function (e) { presetQ = e.target.value; renderPresetList(); });
+  $('#psList').addEventListener('click', function (e) {
+    var j = e.target.closest('[data-jump]'); if (!j) return;
+    var h = document.getElementById(j.dataset.jump), body = $('.sheet-body', sheet);
+    if (h && body) body.scrollTop += h.getBoundingClientRect().top - body.getBoundingClientRect().top - 8;
+  });
   renderPresetList();
 }
 function renderPresetList() {
   var box = $('#psList'); if (!box) return;
-  var q = norm(presetQ), reg = registeredNames(), html = '';
-  PRESET_CATS.forEach(function (cat) {
+  var q = norm(presetQ), reg = registeredNames(), html = '', heads = [];
+  // 大見出し（日用品／食品・飲料）ごとに、その中の分類を並べる
+  [{ g: '', t: '日用品' }, { g: 'food', t: '食品・飲料' }].forEach(function (grp) {
+   var gh = '';
+   PRESET_CATS.forEach(function (cat) {
+    if ((cat.g || '') !== grp.g) return;
     var ps = PRESETS.filter(function (p) { return p.cat === cat.c && (!q || matchQ(p.key, presetQ)); });
     if (!ps.length) return;
-    html += '<div class="sec-title">' + esc(cat.c) + '</div><div class="pick-list">' + ps.map(function (p) {
+    gh += '<div class="sec-title">' + esc(cat.c) + '</div><div class="pick-list">' + ps.map(function (p) {
       return reg.has(norm(p.name))
         ? '<button class="pick preset" data-act="preset" data-name="' + esc(p.name) + '"><b>' + esc(p.name) + '</b><small>登録済み（タップでチェック）</small></button>'
         : presetBtnHTML(p, true);
     }).join('') + '</div>';
+   });
+   if (gh) { html += '<h2 class="grp-title" id="grp-' + (grp.g || 'daily') + '">' + grp.t + '</h2>' + gh; heads.push(grp); }
   });
+  // 見出しが2つともあるときは、上に飛び先のボタンを出す
+  if (heads.length > 1) html = '<div class="chips grp-jump">' + heads.map(function (g) { return '<button class="chip" data-jump="grp-' + (g.g || 'daily') + '">' + g.t + 'へ</button>'; }).join('') + '</div>' + html;
   box.innerHTML = html || '<div class="empty">見つかりませんでした</div>';
 }
 function currentCalc() {
